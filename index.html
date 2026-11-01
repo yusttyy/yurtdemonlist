@@ -14,13 +14,23 @@ body{margin:0;background:radial-gradient(1000px 500px at 80% -10%,#2a1a4a55,tran
 nav{display:inline-flex;gap:6px;flex-wrap:wrap;justify-content:center;margin-top:20px;padding:5px;background:#0e0f1acc;border:1px solid var(--line);border-radius:14px;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
 nav button{background:none;border:1px solid transparent;color:var(--mut);padding:8px 14px;border-radius:10px;font:600 14px inherit;font-family:inherit;cursor:pointer}
 nav button:hover{color:var(--tx)}nav button.on{color:#fff;background:linear-gradient(135deg,var(--acc),var(--acc2))}
-main{max-width:1000px;width:calc(100% - 24px);margin:20px auto 12px;padding:22px 20px 28px;background:#0e0f1acc;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border:1px solid var(--line);border-radius:20px;box-shadow:0 20px 60px #0009}
+main{max-width:1280px;width:calc(100% - 24px);margin:20px auto 12px;padding:22px 20px 28px;background:#0e0f1acc;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border:1px solid var(--line);border-radius:20px;box-shadow:0 20px 60px #0009}
 h1{margin:0 0 4px;font-size:26px}.sub{color:var(--mut);margin:0 0 16px;font-size:14px}
 .tools{display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap}
 input[type=search]{flex:1;min-width:200px;background:var(--card);border:1px solid var(--line);color:var(--tx);padding:10px 14px;border-radius:10px;font-size:14px}
-.lvl{display:flex;gap:14px;background:var(--card);border:1px solid var(--line);border-radius:14px;margin-bottom:12px;overflow:hidden;cursor:pointer;transition:.15s}
-.lvl:hover{border-color:var(--acc2);transform:translateY(-1px)}
-.thumb{position:relative;width:240px;flex:none;aspect-ratio:16/9;background:linear-gradient(135deg,#2b2f55,#4a1d3d);display:grid;place-items:center}
+.lvl{background:var(--card);border:1px solid var(--line);border-radius:14px;margin-bottom:12px;overflow:hidden;transition:border-color .15s}
+.lvl:hover,.lvl.open{border-color:var(--acc2)}
+.head{display:flex;gap:14px;cursor:pointer;align-items:stretch}
+.chev{align-self:center;margin-right:18px;color:var(--mut);font-size:18px;transition:transform .25s}
+.lvl.open .chev{transform:rotate(180deg)}
+.det{display:grid;grid-template-rows:0fr;transition:grid-template-rows .3s ease}
+.lvl.open .det{grid-template-rows:1fr}
+.det-in{overflow:hidden;min-height:0}
+.dbody{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(0,1fr);gap:18px;padding:16px;border-top:1px solid var(--line)}
+.vid{position:relative;aspect-ratio:16/9;background:#000;border-radius:12px;overflow:hidden}
+.vid iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
+.novid{position:absolute;inset:0;display:grid;place-items:center;color:var(--mut);font-size:14px}
+.thumb{position:relative;width:260px;flex:none;aspect-ratio:16/9;background:linear-gradient(135deg,#2b2f55,#4a1d3d);display:grid;place-items:center}
 .thumb img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
 .thumb .pl{font-size:30px;opacity:.6}
 .rank{position:absolute;left:8px;top:8px;background:#000a;padding:2px 10px;border-radius:8px;font-weight:800;font-size:15px}
@@ -60,7 +70,7 @@ input[type=search]{flex:1;min-width:200px;background:var(--card);border:1px soli
 .btn.g{background:var(--card2);border:1px solid var(--line)}
 .empty{color:var(--mut);text-align:center;padding:40px}
 footer{text-align:center;color:var(--mut);font-size:12.5px;padding:12px 20px 24px;text-shadow:0 1px 6px #000}
-@media(max-width:640px){main{padding:16px 12px 20px}.podium{gap:6px}.pod .av{width:44px;height:44px;font-size:18px}.pod .pn{font-size:13px}.lvl{flex-direction:column;gap:0}.thumb{width:100%}.info{padding:12px 14px}}
+@media(max-width:640px){main{padding:16px 12px 20px}.podium{gap:6px}.pod .av{width:44px;height:44px;font-size:18px}.pod .pn{font-size:13px}.head{flex-direction:column;gap:0}.dbody{grid-template-columns:1fr}.chev{display:none}.thumb{width:100%}.info{padding:12px 14px}}
 </style>
 </head>
 <body>
@@ -87,7 +97,7 @@ Goodbye | 8 | Easy Demon | yusttyy | yusttyy | MN-1RR10JX8 |
 `;
 const CHALLENGES=`
 SINERACK | 4 | Insane | yusttyy | yusttyy | XXXXXXXXXXX | 
-DINAMIKA | 2 | Hard | bibis | bibis | XXXXXXXXXXX | yusttyy, s1lent, randomdude
+DINAMIKA | 2 | Hard | bibis | bibis | XXXXXXXXXXX | yusttyy, s1lent, TEST-USER
 `;
 /* ===== ОЧКИ (одинаково для демон и челлендж листа) =====
  FIRST — очки за 1 место, DROP — во сколько раз меньше каждое следующее место
@@ -149,20 +159,30 @@ function render(){
  }
  const arr=L[tab].filter(l=>!q||[l.name,l.creator,l.verifier,l.id].join(" ").toLowerCase().includes(q));
  if(!arr.length){o.innerHTML='<div class="empty">Ничего не найдено</div>';return}
- o.innerHTML=arr.map(l=>`<div class="lvl" data-r="${l.rank}">${thumb(l,l.rank)}<div class="info"><h3>${esc(l.name)}</h3>
+ o.innerHTML=arr.map(l=>`<div class="lvl" data-r="${l.rank}"><div class="head">${thumb(l,l.rank)}<div class="info"><h3>${esc(l.name)}</h3>
  <div class="meta">Создатель: <b>${esc(l.creator)}</b> · Верифер: <b>${esc(l.verifier)}</b></div>
  <div class="meta">ID: <b>${l.id}</b>${l.diff?` · <b style="color:${dc(l.diff)}">${esc(l.diff)}</b>`:""}</div>
- <div class="tags"><span class="tag p">${l.pts} очков</span><span class="tag ok">${new Set([l.verifier,...l.victors]).size} прошли</span></div></div></div>`).join("");
+ <div class="tags"><span class="tag p">${l.pts} очков</span><span class="tag ok">${new Set([l.verifier,...l.victors]).size} прошли</span></div></div><span class="chev">▾</span></div><div class="det"></div></div>`).join("");
 }
-function openLevel(l){
- const v=l.victors.map(n=>`<tr><td><b>${esc(n)}</b></td></tr>`).join("");
- $("#box").innerHTML=`${thumb(l,l.rank)}<div class="body"><h2 style="margin:0 0 4px">${esc(l.name)}</h2>
- <div class="meta">${tab==="demon"?"Демон":"Челлендж"} лист · #${l.rank}</div>
+const levelDetail=l=>{
+ const i=ytId(l.yt), ok=i&&!/^x+$/i.test(i);
+ const web=/^https?:/.test(location.protocol);
+ const vid=ok&&web?`<iframe src="https://www.youtube.com/embed/${i}?rel=0&origin=${encodeURIComponent(location.origin)}" title="${esc(l.name)}" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>`:`<div class="novid" style="padding:16px;text-align:center">${ok?"Встроенный плеер YouTube не работает, когда сайт открыт как файл с диска (ошибка 153). Запусти сайт через хостинг или локальный сервер. Пока смотри по кнопке ниже.":"Видео ещё не добавлено"}</div>`;
+ const ppl=[l.verifier,...l.victors.filter(n=>n!==l.verifier)];
+ return `<div class="det-in"><div class="dbody"><div class="vid">${vid}</div><div class="side">
  <div class="grid"><div>Создатель<b>${esc(l.creator)}</b></div><div>Верифер<b>${esc(l.verifier)}</b></div><div>ID уровня<b>${l.id}</b></div><div>Очки<b>${l.pts}</b></div>${l.diff?`<div style="grid-column:1/-1">Сложность<b style="color:${dc(l.diff)}">${esc(l.diff)}</b></div>`:""}</div>
- <h4 style="margin:14px 0 6px">Прохождения</h4>
- <div class="wrap"><table class="tbl"><tr><th>Игрок</th></tr><tr><td><b>${esc(l.verifier)}</b> (верифер)</td></tr>${v}</table></div>
- <p style="display:flex;gap:8px;margin:16px 0 0;flex-wrap:wrap"><a class="btn" target="_blank" rel="noopener" href="${ytUrl(l.yt)}">Смотреть на YouTube</a><button class="btn g" id="cl">Закрыть</button></p></div>`;
- $("#md").classList.add("show");$("#cl").onclick=close;
+ <h4 style="margin:12px 0 6px">Прохождения · ${ppl.length}</h4>
+ <div class="tags" style="padding:0">${ppl.map((n,k)=>`<span class="tag ok">${esc(n)}${k?"":" ✓"}</span>`).join("")}</div>
+ ${ok?`<p style="margin:14px 0 0"><a class="btn g" target="_blank" rel="noopener" href="${ytUrl(l.yt)}">Открыть на YouTube</a></p>`:""}
+ </div></div></div>`;
+};
+function toggleLvl(c){
+ const was=c.classList.contains("open");
+ document.querySelectorAll(".lvl.open").forEach(x=>{x.classList.remove("open");setTimeout(()=>{if(!x.classList.contains("open"))x.querySelector(".det").innerHTML=""},320)});
+ if(was)return;
+ c.querySelector(".det").innerHTML=levelDetail(L[tab].find(l=>l.rank==c.dataset.r));
+ requestAnimationFrame(()=>c.classList.add("open"));
+ setTimeout(()=>c.scrollIntoView({behavior:"smooth",block:"nearest"}),340);
 }
 const sec=(title,arr,c)=>`<h4 style="margin:14px 0 6px">${title} · ${arr.length}</h4><div class="tags" style="padding:0">${arr.length?arr.map(x=>`<span class="tag ${c}">${esc(x.name)}${x.v?" ✓":""}</span>`).join(""):'<span class="meta">—</span>'}</div>`;
 function openPlayer(n){
@@ -179,7 +199,7 @@ $("#nav").onclick=e=>{const b=e.target.closest("button");if(!b)return;tab=b.data
  document.querySelectorAll("nav button").forEach(x=>x.classList.toggle("on",x===b));$("#q").value="";render()};
 $("#q").oninput=render;
 $("#out").onclick=e=>{
- const c=e.target.closest(".lvl");if(c){openLevel(L[tab].find(l=>l.rank==c.dataset.r));return}
+ const h=e.target.closest(".head");if(h){toggleLvl(h.parentElement);return}
  const r=e.target.closest(".row,.pod");if(r)openPlayer(r.dataset.p);
 };
 render();
