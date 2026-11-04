@@ -20,7 +20,10 @@ h1{margin:0 0 4px;font-size:26px}.sub{color:var(--mut);margin:0 0 16px;font-size
 .tools{display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap}
 input[type=search]{flex:1;min-width:200px;background:var(--card);border:1px solid var(--line);color:var(--tx);padding:10px 14px;border-radius:10px;font-size:14px}
 .lvl{background:var(--card);border:1px solid var(--line);border-radius:14px;margin-bottom:12px;overflow:hidden;transition:border-color .15s}
-.lvl:hover,.lvl.open{border-color:var(--acc2)}
+.lvl{border-left:5px solid var(--dc,var(--line))}
+.lvl:hover,.lvl.open{border-color:var(--acc2);border-left-color:var(--dc,var(--acc2))}
+.face{height:26px;width:auto;vertical-align:middle;margin-right:6px}.dfc{white-space:nowrap}
+
 .head{display:flex;gap:14px;cursor:pointer;align-items:stretch}
 .chev{align-self:center;margin-right:18px;color:var(--mut);font-size:18px;transition:transform .25s}
 .lvl.open .chev{transform:rotate(180deg)}
@@ -100,16 +103,16 @@ footer{text-align:center;color:#e3cfc2;font-size:12.5px;padding:12px 20px 24px;t
 <script>
 /* ===== ДАННЫЕ — редактируй только тут =====
  Одна строка = один уровень. Порядок строк = место в списке (первая строка — топ 1).
- Формат:  Название | ID уровня | Сложность (можно оставить пустой) | Создатель | Верифер | ссылка или ID ютуб видео | yes/no (верифицирован?) | прошли (через запятую)
+ Формат:  Название | ID уровня | Сложность (можно пустой; через ; редкость из папки faces: Easy Demon; Epic — без редкости берётся none) | Время (можно пустым) | Создатель | Верифер | ссылка или ID ютуб видео | yes/no (верифицирован?) | прошли (через запятую)
  Строки, начинающиеся с #, игнорируются. */
 const DEMONS=`
-Renaissance | - | Extreme Demon | yusttyy | yusttyy | XXXXXXXXXXX | no |
-I dont like this | 9 | Medium Demon | s1lent | s1lent | 0LkCaXiTRJk | yes | yusttyy
-Goodbye | 8 | Easy Demon | yusttyy | yusttyy | MN-1RR10JX8 | yes | 
+Renaissance | - | Extreme Demon | - | yusttyy | yusttyy | XXXXXXXXXXX | no | 
+I dont like this | 9 | Medium Demon | 0:49 | s1lent | s1lent | 0LkCaXiTRJk | yes | yusttyy
+Goodbye | 8 | Easy Demon | 0:30 | yusttyy | yusttyy | MN-1RR10JX8 | yes | 
 `;
 const CHALLENGES=`
-SINERACK | 4 | Insane | yusttyy | yusttyy | oXLW1KTzgbs | yes | 
-DINAMIKA | 2 | Hard | bibis | bibis | sl1KzlnIRWA | yes | yusttyy, s1lent, randomdude
+SINERACK | 4 | Insane | 0:04 | yusttyy | yusttyy | oXLW1KTzgbs | yes | 
+DINAMIKA | 2 | Hard | 0:06 | bibis | bibis | sl1KzlnIRWA | yes | yusttyy, s1lent, randomdude
 `;
 /* ===== ОЧКИ (одинаково для демон и челлендж листа) =====
  FIRST — очки за 1 место, DROP — во сколько раз меньше каждое следующее место
@@ -133,13 +136,36 @@ function thumbFb(im){const n=+im.dataset.n+1;if(n<THQ.length){im.dataset.n=n;im.
 const DIFF_REG=[["insane","#ff4de4"],["harder","#ff4500"],["hard","#ffcc00"],["normal","#01ef00"],["easy","#00aeff"]];
 const DIFF_DEM=[["extreme","#b80000"],["insane","#f31f12"],["hard","#ff3950"],["medium","#d838cd"],["easy","#9447f9"]];
 const dc=d=>{d=(d||"").toLowerCase();const dem=d.includes("demon")||tab==="demon";const f=(dem?DIFF_DEM:DIFF_REG).find(x=>d.includes(x[0]));return f?f[1]:"var(--tx)"};
+/* Иконка сложности: faces/<редкость>/<сложность>.png, где имя файла — сложность в camelCase
+ (Easy Demon → easyDemon.png). Нет файла — иконка просто не показывается. */
+const faceFile=d=>{const w=(d||"").toLowerCase().split(/[^a-z0-9]+/).filter(Boolean);return w.map((x,i)=>i?x[0].toUpperCase()+x.slice(1):x).join("")};
+const faceImg=l=>{const f=faceFile(l.diff);return f?`<img class="face" alt="" src="faces/${l.rarity}/${f}.png" onerror="this.remove()">`:""};
 function thumb(l,rank){
  const i=ytId(l.yt);
  return `<div class="thumb"><span class="pl">▶</span>${i?`<img loading="lazy" alt="" data-v="${i}" data-n="0" src="https://img.youtube.com/vi/${i}/maxresdefault.jpg" onload="if(this.naturalWidth<200)thumbFb(this)" onerror="thumbFb(this)">`:""}${rank?`<span class="rank">#${rank}</span>`:""}</div>`;
 }
+/* ===== ДЛИНА УРОВНЯ =====
+ Время пишется как 0:45, 1:30 (м:сс) или просто секундами (45). Категория считается сама:
+ меньше 10 с — Tiny, до 30 — Short, до 60 — Medium, до 120 — Long, дальше — XL.
+ Вместо времени можно написать сразу категорию: Tiny / Short / Medium / Long / XL. */
+const LEN_STEPS=[["Tiny",10],["Short",30],["Medium",60],["Long",120]];
+const LEN_NAMES=["Tiny","Short","Medium","Long","XL"];
+const parseLen=t=>{
+ t=(t||"").trim(); if(!t)return null;
+ const k=LEN_NAMES.findIndex(n=>n.toLowerCase()===t.toLowerCase());
+ if(k>=0)return {cat:LEN_NAMES[k],text:""};
+ let sec=NaN;
+ if(/^\d+:\d{1,2}(:\d{1,2})?$/.test(t))sec=t.split(":").reduce((a,x)=>a*60+ +x,0);
+ else if(/^\d+(\.\d+)?s?$/i.test(t))sec=parseFloat(t);
+ if(isNaN(sec))return {cat:"",text:t};
+ sec=Math.round(sec);
+ return {cat:(LEN_STEPS.find(x=>sec<x[1])||["XL"])[0],text:Math.floor(sec/60)+":"+String(sec%60).padStart(2,"0")};
+};
+const lenText=o=>[o.text,o.cat].filter(Boolean).join(" · ");
 const parse=t=>t.trim().split("\n").filter(s=>s.trim()&&!s.trim().startsWith("#")).map(s=>{
- const [name,id,diff,creator,verifier,yt,ver,v]=s.split("|").map(x=>x.trim());
- return {name,id,diff,creator,verifier,yt,verified:!/^(no|n|false|0)$/i.test(ver||""),victors:(v||"").split(",").map(x=>x.trim()).filter(Boolean)};
+ const [name,id,dr,time,creator,verifier,yt,ver,v]=s.split("|").map(x=>x.trim());
+ const [diff,rar]=(dr||"").split(";").map(x=>x.trim());
+ return {name,id,diff,rarity:(rar||"none").toLowerCase().replace(/[^a-z0-9_-]/g,"")||"none",len:parseLen(time),creator,verifier,yt,verified:!/^(no|n|false|0)$/i.test(ver||""),victors:(v||"").split(",").map(x=>x.trim()).filter(Boolean)};
 });
 function build(){
  const mk=(t,f)=>{let r=0;return parse(t).map((l,k)=>l.verified?({...l,idx:k,rank:++r,pts:f(r)}):({...l,idx:k,rank:0,pts:0}))};
@@ -172,10 +198,10 @@ function render(){
  }
  const arr=L[tab].filter(l=>(showUnv||l.verified)&&(!q||[l.name,l.creator,l.verifier,l.id].join(" ").toLowerCase().includes(q)));
  if(!arr.length){o.innerHTML='<div class="empty">Ничего не найдено</div>';return}
- o.innerHTML=arr.map(l=>`<div class="lvl" data-i="${l.idx}"><div class="head">${thumb(l,showUnv?l.idx+1:l.rank)}<div class="info"><h3>${esc(l.name)}</h3>
+ o.innerHTML=arr.map(l=>`<div class="lvl" data-i="${l.idx}" style="--dc:${dc(l.diff)}"><div class="head">${thumb(l,showUnv?l.idx+1:l.rank)}<div class="info"><h3>${esc(l.name)}</h3>
  <div class="meta">Создатель: <b>${esc(l.creator)}</b> · Верифер: <b>${esc(l.verifier||"—")}</b></div>
- <div class="meta">ID: <b>${l.id}</b>${l.diff?` · <b style="color:${dc(l.diff)}">${esc(l.diff)}</b>`:""}</div>
- <div class="tags">${l.verified?`<span class="tag p">${l.pts} очков</span>`:'<span class="tag u">Unverified</span>'}<span class="tag ok">${new Set(l.verified?[l.verifier,...l.victors]:l.victors).size} прошли</span></div></div><span class="chev">▾</span></div><div class="det"></div></div>`).join("");
+ <div class="meta">ID: <b>${l.id}</b>${l.diff?` · <span class="dfc">${faceImg(l)}<b style="color:${dc(l.diff)}">${esc(l.diff)}</b></span>`:""}</div>
+ <div class="tags">${l.verified?`<span class="tag p">${l.pts} очков</span>`:'<span class="tag u">Unverified</span>'}<span class="tag ok">${new Set(l.verified?[l.verifier,...l.victors]:l.victors).size} прошли</span>${l.len?`<span class="tag">⏱ ${esc(lenText(l.len))}</span>`:""}</div></div><span class="chev">▾</span></div><div class="det"></div></div>`).join("");
 }
 const levelDetail=l=>{
  const i=ytId(l.yt), ok=i&&!/^x+$/i.test(i);
@@ -183,7 +209,7 @@ const levelDetail=l=>{
  const vid=ok&&web?`<iframe src="https://www.youtube.com/embed/${i}?rel=0&origin=${encodeURIComponent(location.origin)}" title="${esc(l.name)}" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>`:`<div class="novid" style="padding:16px;text-align:center">${ok?"Встроенный плеер YouTube не работает, когда сайт открыт как файл с диска (ошибка 153). Запусти сайт через хостинг или локальный сервер. Пока смотри по кнопке ниже.":"Видео ещё не добавлено"}</div>`;
  const ppl=l.verified?[l.verifier,...l.victors.filter(n=>n!==l.verifier)]:[...new Set(l.victors)];
  return `<div class="det-in"><div class="dbody"><div class="vid">${vid}</div><div class="side">
- <div class="grid"><div>Создатель<b>${esc(l.creator)}</b></div><div>Верифер<b>${esc(l.verifier||"—")}</b></div><div>ID уровня<b>${l.id}</b></div><div>Очки<b>${l.verified?l.pts:"—"}</b></div>${l.verified?"":'<div style="grid-column:1/-1">Статус<b style="color:#ffb14d">Unverified</b></div>'}${l.diff?`<div style="grid-column:1/-1">Сложность<b style="color:${dc(l.diff)}">${esc(l.diff)}</b></div>`:""}</div>
+ <div class="grid"><div>Создатель<b>${esc(l.creator)}</b></div><div>Верифер<b>${esc(l.verifier||"—")}</b></div><div>ID уровня<b>${l.id}</b></div>${l.len?`<div>Длина<b>${esc(lenText(l.len))}</b></div>`:""}<div>Очки<b>${l.verified?l.pts:"—"}</b></div>${l.verified?"":'<div>Статус<b style="color:#ffb14d">Unverified</b></div>'}${l.diff?`<div>Сложность<b style="color:${dc(l.diff)}">${faceImg(l)}${esc(l.diff)}</b></div>`:""}</div>
  <h4 style="margin:12px 0 6px">Прохождения · ${ppl.length}</h4>
  <div class="tags" style="padding:0">${ppl.map((n,k)=>`<span class="tag ok">${esc(n)}${l.verified&&!k?" ✓":""}</span>`).join("")||'<span class="meta">—</span>'}</div>
  ${ok?`<p style="margin:14px 0 0"><a class="btn g" target="_blank" rel="noopener" href="${ytUrl(l.yt)}">Открыть на YouTube</a></p>`:""}
