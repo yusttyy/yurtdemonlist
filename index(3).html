@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>YurtLink GDPS — Demonlist</title>
+<style>
+:root{color-scheme:dark;--bg:#0d1218;--card:#151c25;--card2:#1c2530;--line:#273241;--line2:#3a4a5e;--tx:#e8edf3;--mut:#93a1b2;--acc:#7dd3c0;--acc2:#5aa9e6;--ok:#8fd9ad;--amb:#e8bd72;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+*{box-sizing:border-box}html{scroll-padding-top:env(safe-area-inset-top,0px);scrollbar-color:#2b3745 transparent}
+::selection{background:#5aa9e655}
+body{margin:0;background:var(--bg);color:var(--tx);font-family:Inter,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;min-height:100vh;line-height:1.4}
+body::before{content:"";position:fixed;inset:-12px;z-index:-1;background:radial-gradient(900px 480px at 50% -10%,#3b7a8a33,transparent),linear-gradient(#0a0f14a6,#0a0f14d6),url(bg.jpg) center/cover no-repeat;filter:blur(4px);pointer-events:none}
+.hero{text-align:center;padding:44px 16px 4px}
+.hero-in{display:inline-flex;flex-direction:column;align-items:stretch;gap:14px;max-width:100%;padding:16px 20px 18px;background:#0e141bcc;border:1px solid var(--line);border-radius:28px;backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);box-shadow:0 18px 50px #0008}
+.logo{display:inline-block;font-weight:800;font-size:clamp(34px,7vw,66px);letter-spacing:.5px;line-height:1.05;margin:0;padding:0 14px;color:#f1f5f9;text-shadow:0 2px 18px #0009}
+.logo b{background:linear-gradient(135deg,#8fe0cf,#5aa9e6);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;text-shadow:none}
+nav{display:flex;gap:4px;justify-content:center;padding:4px;background:#0b1117;border:1px solid var(--line);border-radius:14px}
+nav button{flex:1;background:none;border:0;color:var(--mut);padding:11px 20px;border-radius:10px;font-family:inherit;font-weight:600;font-size:15px;cursor:pointer;transition:color .15s,background .15s}
+nav button:hover{color:var(--tx);background:#ffffff0a}
+nav button.on{color:#0b1a22;background:linear-gradient(135deg,var(--acc),var(--acc2));box-shadow:0 4px 14px #5aa9e640}
+main{max-width:1280px;width:calc(100% - 24px);margin:22px auto 12px;padding:26px 24px 30px;background:#0f161dd9;backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border:1px solid var(--line);border-radius:22px;box-shadow:0 24px 70px #0007}
+h1{margin:0 0 4px;font-size:28px;font-weight:700;letter-spacing:.2px}
+.sub{color:var(--mut);margin:0 0 20px;font-size:14px}
+.tools{display:flex;gap:10px;margin-bottom:18px;flex-wrap:wrap}
+input[type=search]{flex:1;min-width:200px;background:var(--card);border:1px solid var(--line);color:var(--tx);padding:11px 16px;border-radius:12px;font-size:14px;font-family:inherit;transition:border-color .15s,box-shadow .15s}
+input[type=search]::placeholder{color:#6d7b8c}
+input[type=search]:focus{outline:0;border-color:var(--acc);box-shadow:0 0 0 3px #7dd3c026}
+.sw{display:inline-flex;align-items:center;gap:10px;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px 16px;cursor:pointer;font-size:14px;color:var(--mut);user-select:none;transition:border-color .15s}
+.sw:hover{border-color:var(--line2)}
+.sw input{display:none}
+.sw .knob{width:36px;height:20px;border-radius:99px;background:var(--card2);border:1px solid var(--line2);position:relative;transition:.2s}
+.sw .knob::after{content:"";position:absolute;top:2px;left:2px;width:14px;height:14px;border-radius:50%;background:var(--mut);transition:.2s}
+.sw:has(input:checked){color:var(--tx)}
+.sw input:checked+.knob{background:linear-gradient(135deg,var(--acc),var(--acc2));border-color:transparent}
+.sw input:checked+.knob::after{left:18px;background:#0b1a22}
+.lvl{background:var(--card);border:1px solid var(--line);border-left:4px solid var(--dc,var(--line));border-radius:16px;margin-bottom:12px;overflow:hidden;transition:border-color .2s,box-shadow .2s}
+.lvl:hover,.lvl.open{border-color:var(--line2);border-left-color:var(--dc,var(--line2));box-shadow:0 10px 30px #0006}
+.head{display:flex;gap:18px;cursor:pointer;align-items:stretch;padding:12px}
+.chev{align-self:center;margin-right:8px;color:var(--mut);font-size:18px;transition:transform .25s}
+.lvl.open .chev{transform:rotate(180deg)}
+.thumb{position:relative;width:280px;flex:none;aspect-ratio:16/9;border-radius:12px;overflow:hidden;background:linear-gradient(135deg,#1f2c3a,#2a3d50);display:grid;place-items:center}
+.thumb img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.thumb .pl{font-size:30px;opacity:.5}
+.rank{position:absolute;left:8px;top:8px;background:#0b1117c8;backdrop-filter:blur(6px);padding:3px 11px;border-radius:9px;font-weight:700;font-size:14px;border:1px solid #ffffff1a}
+.info{padding:2px 4px 2px 0;flex:1;min-width:0;display:flex;flex-direction:column;gap:6px}
+.info h3{margin:0;font-size:20px;font-weight:700;letter-spacing:.2px}
+.dfc{display:flex;align-items:center;gap:10px;min-height:46px;white-space:nowrap}
+.dfc b{font-size:16px;font-weight:700;line-height:1}
+.face{height:46px;width:auto;flex:none;display:block;filter:drop-shadow(0 2px 6px #0007)}
+.meta{color:var(--mut);font-size:13.5px}.meta b{color:var(--tx);font-weight:600}
+.tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:auto;padding-top:6px}
+.tag{font-size:12.5px;padding:4px 11px;border-radius:99px;background:#1f2a36;border:1px solid var(--line);color:var(--mut)}
+.tag.p{color:#0b1a22;background:linear-gradient(135deg,var(--acc),var(--acc2));border:0;font-weight:700}
+.tag.ok{color:var(--ok);background:#8fd9ad14;border-color:#8fd9ad40}
+.tag.u{color:var(--amb);background:#e8bd7214;border-color:#e8bd7255}
+.tag.d{color:#f0a3b0;background:#f0a3b014;border-color:#f0a3b04d}
+.tag.c{color:#b9b3f0;background:#b9b3f014;border-color:#b9b3f04d}
+.det{display:grid;grid-template-rows:0fr;transition:grid-template-rows .3s ease}
+.lvl.open .det{grid-template-rows:1fr}
+.det-in{overflow:hidden;min-height:0}
+.dbody{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(0,1fr);gap:20px;padding:18px;border-top:1px solid var(--line);background:#11181f}
+.vid{position:relative;aspect-ratio:16/9;background:#000;border-radius:14px;overflow:hidden;box-shadow:0 8px 24px #0006}
+.vid iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
+.novid{position:absolute;inset:0;display:grid;place-items:center;color:var(--mut);font-size:14px}
+.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin:0 0 12px}
+.grid div{background:var(--card2);border:1px solid var(--line);padding:10px 14px;border-radius:12px;font-size:12.5px;color:var(--mut)}
+.grid b{display:block;color:var(--tx);font-size:15px;font-weight:600;margin-top:3px}
+.grid b:has(.face){display:flex;align-items:center;gap:10px}
+.grid .face{height:38px}
+h4{margin:0;font-size:14px;font-weight:600;color:var(--tx)}
+.tbl{width:100%;border-collapse:separate;border-spacing:0;background:var(--card);border:1px solid var(--line);border-radius:16px;overflow:hidden}
+.tbl th,.tbl td{padding:13px 16px;text-align:left;border-bottom:1px solid var(--line);font-size:14px}
+.tbl tr:last-child td{border-bottom:0}
+.tbl th{color:var(--mut);font-size:11.5px;font-weight:600;text-transform:uppercase;letter-spacing:.8px;background:#121921}
+.tbl tr.row{cursor:pointer;transition:background .15s}.tbl tr.row:hover{background:var(--card2)}
+.wrap{overflow-x:auto}
+.podium{display:flex;align-items:flex-end;justify-content:center;gap:12px;margin:10px 0 26px}
+.pod{flex:1;max-width:230px;display:flex;flex-direction:column;align-items:center;text-align:center;cursor:pointer;transition:transform .2s}
+.pod:hover{transform:translateY(-4px)}
+.pod.p1{--c:#ffd24d;--c2:#ff9d00}.pod.p2{--c:#c8d0e0;--c2:#6f8fd6}.pod.p3{--c:#e0955a;--c2:#b8501f}
+.pod .cr{font-size:22px;line-height:1;margin-bottom:2px}
+.pod .av{width:64px;height:64px;margin-bottom:8px}
+.pod .av svg{width:100%;height:100%;display:block}
+.pod .av .o{fill:var(--c)}.pod .av .i{fill:var(--c2)}
+.pod .pn{font-weight:700;font-size:15px;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pod .pp{color:var(--mut);font-size:13px;margin-bottom:10px}
+.pod .step{width:100%;display:grid;place-items:center;background:linear-gradient(180deg,#212d3a,#151c25);border:1px solid var(--line);border-top:3px solid var(--c);border-radius:14px 14px 0 0}
+.pod .step span{font-size:34px;font-weight:800;color:var(--c)}
+.p1 .step{height:130px}.p2 .step{height:100px}.p3 .step{height:78px}
+.top1{color:#ffd24d}.top2{color:#c8d0e0}.top3{color:#e0955a}
+.modal{position:fixed;inset:0;background:#05080cc4;backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);display:none;place-items:center;z-index:20;padding:16px}
+.modal.show{display:grid}
+.box{background:var(--card);border:1px solid var(--line2);border-radius:20px;max-width:620px;width:100%;max-height:90vh;overflow:auto;box-shadow:0 30px 80px #000a}
+.box .thumb{width:100%;border-radius:0}.box .body{padding:20px 22px 22px}
+.btn{display:inline-block;background:linear-gradient(135deg,var(--acc),var(--acc2));color:#0b1a22;text-decoration:none;padding:10px 18px;border-radius:12px;font-weight:700;font-size:14px;border:0;cursor:pointer;font-family:inherit;transition:filter .15s}
+.btn:hover{filter:brightness(1.08)}
+.btn.g{background:var(--card2);border:1px solid var(--line2);color:var(--tx)}
+.empty{color:var(--mut);text-align:center;padding:44px}
+footer{text-align:center;color:#c3ced9;font-size:12.5px;padding:12px 20px 26px;text-shadow:0 1px 8px #000,0 0 14px #000}
+@media(max-width:640px){main{padding:18px 12px 22px}.hero-in{padding:12px}.podium{gap:6px}.pod .av{width:44px;height:44px}.pod .pn{font-size:13px}.head{flex-direction:column;gap:12px}.dbody{grid-template-columns:1fr}.chev{display:none}.thumb{width:100%}.info{padding:0 4px 4px}}
+</style>
+</head>
+<body>
+<div class="hero"><div class="hero-in">
+<div class="logo">YurtLink <b>GDPS</b></div>
+<nav id="nav">
+<button data-t="demon" class="on">Демоны</button>
+<button data-t="challenge">Челленджи</button>
+<button data-t="players">Игроки</button>
+</nav></div></div>
+<main><h1 id="ttl"></h1><p class="sub" id="sub"></p>
+<div class="tools"><input type="search" id="q" placeholder="Поиск по названию, нику или ID…"><label class="sw"><input type="checkbox" id="unv"><span class="knob"></span>Unverified</label></div>
+<div id="out"></div></main>
+<div class="modal" id="md"><div class="box" id="box"></div></div>
+<footer>YurtLink GDPS · Demonlist · не связано с RobTop Games</footer>
+<script>
+/* ===== ДАННЫЕ — редактируй только тут =====
+ Одна строка = один уровень. Порядок строк = место в списке (первая строка — топ 1).
+ Формат:  Название | ID уровня | Сложность (можно пустой; через ; редкость из папки faces: Easy Demon; Epic — без редкости берётся none) | Время (можно пустым) | Создатель | Верифер | ссылка или ID ютуб видео | yes/no (верифицирован?) | прошли (через запятую)
+ Строки, начинающиеся с #, игнорируются. */
+const DEMONS=`
+Renaissance | - | Extreme Demon | - | yusttyy | yusttyy | XXXXXXXXXXX | no | 
+I dont like this | 9 | Medium Demon; Feature | 0:49 | s1lent | s1lent | 0LkCaXiTRJk | yes | yusttyy
+Goodbye | 8 | Easy Demon; Feature | 0:30 | yusttyy | yusttyy | MN-1RR10JX8 | yes | 
+`;
+const CHALLENGES=`
+SINERACK | 4 | Insane | 0:04 | yusttyy | yusttyy | oXLW1KTzgbs | yes | 
+DINAMIKA | 2 | Hard | 0:06 | bibis | bibis | sl1KzlnIRWA | yes | yusttyy, s1lent, randomdude
+`;
+/* ===== ОЧКИ (одинаково для демон и челлендж листа) =====
+ FIRST — очки за 1 место, DROP — во сколько раз меньше каждое следующее место
+ (0.8 → 100, 80, 64, 51.2 …), VERIFY_BONUS — множитель для верифера уровня. */
+const FIRST=100, DROP=0.8, VERIFY_BONUS=1.1;
+const pts=r=>+(FIRST*Math.pow(DROP,r-1)).toFixed(2);
+/* ===== логика ===== */
+const $=s=>document.querySelector(s);
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const ytId=v=>{const m=String(v||"").match(/(?:v=|youtu\.be\/|embed\/)?([\w-]{11})/);return m?m[1]:""};
+const ytUrl=v=>"https://www.youtube.com/watch?v="+ytId(v);
+let tab="demon", showUnv=false;
+const META={demon:["Демон лист","Топ сложнейших уровней YurtLink GDPS. Чем выше уровень, тем больше очков."],
+challenge:["Челлендж лист","Уровни-челленджи сервера: короткие, но очень требовательные."],
+players:["Лист игроков","Рейтинг по сумме очков за верификации и прохождения."]};
+const THQ=["maxresdefault","sddefault","hqdefault"];
+function thumbFb(im){const n=+im.dataset.n+1;if(n<THQ.length){im.dataset.n=n;im.src="https://img.youtube.com/vi/"+im.dataset.v+"/"+THQ[n]+".jpg"}else im.remove()}
+/* ===== ЦВЕТА СЛОЖНОСТЕЙ =====
+ Если в названии есть слово "demon" — берётся палитра демонов; иначе палитра зависит от листа
+ (демон лист → демоны, челлендж лист → обычные). Порядок важен: harder проверяется раньше hard. */
+const DIFF_REG=[["insane","#ff4de4"],["harder","#ff4500"],["hard","#ffcc00"],["normal","#01ef00"],["easy","#00aeff"]];
+const DIFF_DEM=[["extreme","#b80000"],["insane","#f31f12"],["hard","#ff3950"],["medium","#d838cd"],["easy","#9447f9"]];
+const dc=d=>{d=(d||"").toLowerCase();const dem=d.includes("demon")||tab==="demon";const f=(dem?DIFF_DEM:DIFF_REG).find(x=>d.includes(x[0]));return f?f[1]:"var(--tx)"};
+/* Иконка сложности: faces/<редкость>/<сложность>.png, где имя файла — сложность в camelCase
+ (Easy Demon → easyDemon.png). Нет файла — иконка просто не показывается. */
+const faceFile=d=>{const w=(d||"").toLowerCase().split(/[^a-z0-9]+/).filter(Boolean);return w.map((x,i)=>i?x[0].toUpperCase()+x.slice(1):x).join("")};
+const faceImg=l=>{const f=faceFile(l.diff);return f?`<img class="face" alt="" src="faces/${l.rarity}/${f}.png" onerror="this.remove()">`:""};
+function thumb(l,rank){
+ const i=ytId(l.yt);
+ return `<div class="thumb"><span class="pl">▶</span>${i?`<img loading="lazy" alt="" data-v="${i}" data-n="0" src="https://img.youtube.com/vi/${i}/maxresdefault.jpg" onload="if(this.naturalWidth<200)thumbFb(this)" onerror="thumbFb(this)">`:""}${rank?`<span class="rank">#${rank}</span>`:""}</div>`;
+}
+/* ===== ДЛИНА УРОВНЯ =====
+ Время пишется как 0:45, 1:30 (м:сс) или просто секундами (45). Категория считается сама:
+ меньше 10 с — Tiny, до 30 — Short, до 60 — Medium, до 120 — Long, дальше — XL.
+ Вместо времени можно написать сразу категорию: Tiny / Short / Medium / Long / XL. */
+const LEN_STEPS=[["Tiny",10],["Short",30],["Medium",60],["Long",120]];
+const LEN_NAMES=["Tiny","Short","Medium","Long","XL"];
+const parseLen=t=>{
+ t=(t||"").trim(); if(!t)return null;
+ const k=LEN_NAMES.findIndex(n=>n.toLowerCase()===t.toLowerCase());
+ if(k>=0)return {cat:LEN_NAMES[k],text:""};
+ let sec=NaN;
+ if(/^\d+:\d{1,2}(:\d{1,2})?$/.test(t))sec=t.split(":").reduce((a,x)=>a*60+ +x,0);
+ else if(/^\d+(\.\d+)?s?$/i.test(t))sec=parseFloat(t);
+ if(isNaN(sec))return {cat:"",text:t};
+ sec=Math.round(sec);
+ return {cat:(LEN_STEPS.find(x=>sec<x[1])||["XL"])[0],text:Math.floor(sec/60)+":"+String(sec%60).padStart(2,"0")};
+};
+const lenText=o=>[o.text,o.cat].filter(Boolean).join(" · ");
+const parse=t=>t.trim().split("\n").filter(s=>s.trim()&&!s.trim().startsWith("#")).map(s=>{
+ const [name,id,dr,time,creator,verifier,yt,ver,v]=s.split("|").map(x=>x.trim());
+ const [diff,rar]=(dr||"").split(";").map(x=>x.trim());
+ return {name,id,diff,rarity:(rar||"none").toLowerCase().replace(/[^a-z0-9_-]/g,"")||"none",len:parseLen(time),creator,verifier,yt,verified:!/^(no|n|false|0)$/i.test(ver||""),victors:(v||"").split(",").map(x=>x.trim()).filter(Boolean)};
+});
+function build(){
+ const mk=(t,f)=>{let r=0;return parse(t).map((l,k)=>l.verified?({...l,idx:k,rank:++r,pts:f(r)}):({...l,idx:k,rank:0,pts:0}))};
+ return {demon:mk(DEMONS,pts),challenge:mk(CHALLENGES,pts)};
+}
+const L=build();
+function players(){
+ const m={};
+ const add=(n,pts,lvl,v,t)=>{const p=m[n]||(m[n]={n,pts:0,list:[],ver:0,dem:[],chal:[]});p.pts+=pts;p.list.push(lvl);(t==="d"?p.dem:p.chal).push({name:lvl,v});if(v)p.ver++};
+ [["d",L.demon],["c",L.challenge]].forEach(([t,arr])=>arr.forEach(l=>{if(!l.verified)return;
+  add(l.verifier,+(l.pts*VERIFY_BONUS).toFixed(2),l.name,true,t);
+  l.victors.forEach(n=>{if(n!==l.verifier)add(n,l.pts,l.name,false,t)});
+ }));
+ return Object.values(m).sort((a,b)=>b.pts-a.pts);
+}
+function render(){
+ const q=$("#q").value.trim().toLowerCase();
+ $("#ttl").textContent=META[tab][0];$("#sub").textContent=META[tab][1];
+ $("#unv").parentElement.style.display=tab==="players"?"none":"";
+ const o=$("#out");
+ if(tab==="players"){
+  const all=players().map((p,i)=>({...p,rank:i+1}));
+  const P=all.filter(p=>p.n.toLowerCase().includes(q));
+  if(!P.length){o.innerHTML='<div class="empty">Ничего не найдено</div>';return}
+  const pod=q?[]:all.slice(0,3), rest=q?P:all.slice(3);
+  const podHtml=pod.length?`<div class="podium">${[1,0,2].filter(i=>pod[i]).map(i=>{const p=pod[i];return `<div class="pod p${i+1}" data-p="${esc(p.n)}">${i?"":'<div class="cr">👑</div>'}<div class="av"><svg viewBox="0 0 250 250" aria-hidden="true"><path class="o" fill-rule="evenodd" d="M6 6H244V244H6Z M64 64V186H186V64Z" stroke="#000" stroke-width="12" stroke-linejoin="miter"/><rect x="64" y="64" width="122" height="122" fill="none" stroke="#000" stroke-width="12"/><rect class="i" x="96" y="96" width="58" height="58" rx="10" stroke="#000" stroke-width="12"/></svg></div><div class="pn">${esc(p.n)}</div><div class="pp">${p.pts.toFixed(2)} очков</div><div class="step"><span>${i+1}</span></div></div>`}).join("")}</div>`:"";
+  const tbl=rest.length?`<div class="wrap"><table class="tbl"><tr><th>#</th><th>Игрок</th><th>Уровней</th><th>Верификаций</th><th>Очки</th></tr>${rest.map(p=>`<tr class="row" data-p="${esc(p.n)}"><td class="${p.rank<4?"top"+p.rank:""}"><b>${p.rank}</b></td><td><b>${esc(p.n)}</b></td><td>${p.list.length}</td><td>${p.ver}</td><td><b>${p.pts.toFixed(2)}</b></td></tr>`).join("")}</table></div>`:"";
+  o.innerHTML=podHtml+tbl;
+  return;
+ }
+ const arr=L[tab].filter(l=>(showUnv||l.verified)&&(!q||[l.name,l.creator,l.verifier,l.id].join(" ").toLowerCase().includes(q)));
+ if(!arr.length){o.innerHTML='<div class="empty">Ничего не найдено</div>';return}
+ o.innerHTML=arr.map(l=>`<div class="lvl" data-i="${l.idx}" style="--dc:${dc(l.diff)}"><div class="head">${thumb(l,showUnv?l.idx+1:l.rank)}<div class="info"><h3>${esc(l.name)}</h3>${l.diff?`<div class="dfc">${faceImg(l)}<b style="color:${dc(l.diff)}">${esc(l.diff)}</b></div>`:""}
+ <div class="meta">Создатель: <b>${esc(l.creator)}</b> · Верифер: <b>${esc(l.verifier||"—")}</b></div>
+ <div class="meta">ID: <b>${l.id}</b></div>
+ <div class="tags">${l.verified?`<span class="tag p">${l.pts} очков</span>`:'<span class="tag u">Unverified</span>'}<span class="tag ok">${new Set(l.verified?[l.verifier,...l.victors]:l.victors).size} прошли</span>${l.len?`<span class="tag">⏱ ${esc(lenText(l.len))}</span>`:""}</div></div><span class="chev">▾</span></div><div class="det"></div></div>`).join("");
+}
+const levelDetail=l=>{
+ const i=ytId(l.yt), ok=i&&!/^x+$/i.test(i);
+ const web=/^https?:/.test(location.protocol);
+ const vid=ok&&web?`<iframe src="https://www.youtube.com/embed/${i}?rel=0&origin=${encodeURIComponent(location.origin)}" title="${esc(l.name)}" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>`:`<div class="novid" style="padding:16px;text-align:center">${ok?"Встроенный плеер YouTube не работает, когда сайт открыт как файл с диска (ошибка 153). Запусти сайт через хостинг или локальный сервер. Пока смотри по кнопке ниже.":"Видео ещё не добавлено"}</div>`;
+ const ppl=l.verified?[l.verifier,...l.victors.filter(n=>n!==l.verifier)]:[...new Set(l.victors)];
+ return `<div class="det-in"><div class="dbody"><div class="vid">${vid}</div><div class="side">
+ <div class="grid"><div>Создатель<b>${esc(l.creator)}</b></div><div>Верифер<b>${esc(l.verifier||"—")}</b></div><div>ID уровня<b>${l.id}</b></div>${l.len?`<div>Длина<b>${esc(lenText(l.len))}</b></div>`:""}<div>Очки<b>${l.verified?l.pts:"—"}</b></div>${l.verified?"":'<div>Статус<b style="color:#ffb14d">Unverified</b></div>'}${l.diff?`<div>Сложность<b style="color:${dc(l.diff)}">${faceImg(l)}${esc(l.diff)}</b></div>`:""}</div>
+ <h4 style="margin:12px 0 6px">Прохождения · ${ppl.length}</h4>
+ <div class="tags" style="padding:0">${ppl.map((n,k)=>`<span class="tag ok">${esc(n)}${l.verified&&!k?" ✓":""}</span>`).join("")||'<span class="meta">—</span>'}</div>
+ ${ok?`<p style="margin:14px 0 0"><a class="btn g" target="_blank" rel="noopener" href="${ytUrl(l.yt)}">Открыть на YouTube</a></p>`:""}
+ </div></div></div>`;
+};
+function toggleLvl(c){
+ const was=c.classList.contains("open");
+ document.querySelectorAll(".lvl.open").forEach(x=>{x.classList.remove("open");setTimeout(()=>{if(!x.classList.contains("open"))x.querySelector(".det").innerHTML=""},320)});
+ if(was)return;
+ c.querySelector(".det").innerHTML=levelDetail(L[tab][c.dataset.i]);
+ requestAnimationFrame(()=>c.classList.add("open"));
+ setTimeout(()=>c.scrollIntoView({behavior:"smooth",block:"nearest"}),340);
+}
+const sec=(title,arr,c)=>`<h4 style="margin:14px 0 6px">${title} · ${arr.length}</h4><div class="tags" style="padding:0">${arr.length?arr.map(x=>`<span class="tag ${c}">${esc(x.name)}${x.v?" ✓":""}</span>`).join(""):'<span class="meta">—</span>'}</div>`;
+function openPlayer(n){
+ const p=players().find(x=>x.n===n);
+ $("#box").innerHTML=`<div class="body"><h2 style="margin:0 0 4px">${esc(p.n)}</h2><div class="meta">${p.pts.toFixed(2)} очков · ${p.ver} верификаций</div>
+ ${sec("Демоны",p.dem,"d")}${sec("Челленджи",p.chal,"c")}<div class="meta" style="margin-top:10px">✓ — верифер уровня</div>
+ <p style="margin:16px 0 0"><button class="btn g" id="cl">Закрыть</button></p></div>`;
+ $("#md").classList.add("show");$("#cl").onclick=close;
+}
+const close=()=>$("#md").classList.remove("show");
+$("#md").onclick=e=>{if(e.target.id==="md")close()};
+document.addEventListener("keydown",e=>{if(e.key==="Escape")close()});
+$("#nav").onclick=e=>{const b=e.target.closest("button");if(!b)return;tab=b.dataset.t;
+ document.querySelectorAll("nav button").forEach(x=>x.classList.toggle("on",x===b));$("#q").value="";render()};
+$("#q").oninput=render;
+$("#unv").onchange=e=>{showUnv=e.target.checked;render()};
+$("#out").onclick=e=>{
+ const h=e.target.closest(".head");if(h){toggleLvl(h.parentElement);return}
+ const r=e.target.closest(".row,.pod");if(r)openPlayer(r.dataset.p);
+};
+render();
+</script>
+</body>
+</html>
