@@ -240,7 +240,7 @@ function render(){
  if(!arr.length){o.innerHTML='<div class="empty">Ничего не найдено</div>';return}
  o.innerHTML=arr.map(l=>`<div class="lvl" data-i="${l.idx}" style="--dc:${dc(l.diff)}"><div class="head">${thumb(l,showUnv?l.idx+1:l.rank)}<div class="info"><h3>${esc(l.name)}<span class="by">by ${esc(l.creator)}</span></h3>${l.diff?`<div class="dfc">${faceImg(l)}<b style="color:${dc(l.diff)}">${esc(l.diff)}</b></div>`:""}
  <div class="meta">Верифер: <b>${esc(l.verifier||"—")}</b> · ID: <b>${l.id}</b>${l.len?` · ⏱ <b>${esc(lenText(l.len))}</b>`:""}</div>
- <div class="tags">${l.verified?`<span class="tag p">${l.pts} очков</span>`:'<span class="tag u">Unverified</span>'}<span class="tag ok">${fullN(l)} прошли</span>${bestP(l)?`<span class="tag u">лучший прогресс: ${+bestP(l).toFixed(1)}%</span>`:""}</div></div><span class="chev">▾</span></div><div class="det"></div></div>`).join("");
+ <div class="tags">${l.verified?`<span class="tag p">${l.pts} очков</span>`:'<span class="tag u">Unverified</span>'}<span class="tag ok">${fullN(l)} прошли</span>${bestP(l)?`<span class="tag u">Прогресс: ${+bestP(l).toFixed(1)}%</span>`:""}</div></div><span class="chev">▾</span></div><div class="det"></div></div>`).join("");
 }
 const levelDetail=l=>{
  const i=ytId(l.yt), ok=i&&!/^x+$/i.test(i);
