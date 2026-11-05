@@ -69,6 +69,18 @@ input[type=search]:focus{outline:0;border-color:var(--acc);box-shadow:0 0 0 3px 
 .grid b:has(.face){display:flex;align-items:center;gap:4px}
 .grid .face{height:30px}
 h4{margin:0;font-size:14px;font-weight:600;color:var(--tx)}
+.rec{width:100%;border-collapse:separate;border-spacing:0;background:var(--card);border:1px solid var(--line);border-radius:12px;overflow:hidden;font-size:13px}
+.rec th,.rec td{padding:8px 12px;text-align:left;border-bottom:1px solid var(--line);vertical-align:middle}
+.rec tr:last-child td{border-bottom:0}
+.rec th{color:var(--mut);font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.7px;background:#121921}
+.rec td:first-child,.rec th:first-child{width:34px;color:var(--mut)}
+.rec .r{text-align:right;font-variant-numeric:tabular-nums}
+.rec .vf{color:var(--ok);font-size:12px}
+.rec .pc{font-weight:600;color:var(--ok)}
+.rec td.part .pc{color:var(--amb)}
+.rec .bar{display:block;height:4px;min-width:70px;border-radius:99px;background:#243040;margin-top:5px;overflow:hidden}
+.rec .bar i{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,var(--acc),var(--acc2))}
+.rec td.part .bar i{background:var(--amb)}
 .tbl{width:100%;border-collapse:separate;border-spacing:0;background:var(--card);border:1px solid var(--line);border-radius:16px;overflow:hidden}
 .tbl th,.tbl td{padding:13px 16px;text-align:left;border-bottom:1px solid var(--line);font-size:14px}
 .tbl tr:last-child td{border-bottom:0}
@@ -117,10 +129,10 @@ footer{text-align:center;color:#c3ced9;font-size:12.5px;padding:12px 20px 26px;t
 <script>
 /* ===== ДАННЫЕ — редактируй только тут =====
  Одна строка = один уровень. Порядок строк = место в списке (первая строка — топ 1).
- Формат:  Название | ID уровня | Сложность (можно пустой; через ; редкость из папки faces: Easy Demon; Epic — без редкости берётся none) | Время (можно пустым) | Создатель | Верифер | ссылка или ID ютуб видео | yes/no (верифицирован?) | прошли (через запятую; можно с процентом: ник 72%, без процента = 100%; меньше 100% очков не даёт)
+ Формат:  Название | ID уровня | Сложность (можно пустой; через ; редкость из папки faces: Easy Demon; Epic — без редкости берётся none) | Время (можно пустым) | Создатель | Верифер | ссылка или ID ютуб видео | yes/no (верифицирован?) | рекорды (через запятую; можно с процентом: ник 72%, без процента = 100%; меньше 100% даёт 0.3× очков уровня)
  Строки, начинающиеся с #, игнорируются. */
 const DEMONS=`
-Renaissance | - | Extreme Demon; Legendary | - | yusttyy | yusttyy 50% | XXXXXXXXXXX | no | 
+Renaissance | - | Extreme Demon; Legendary | - | yusttyy | yusttyy | XXXXXXXXXXX | no | yusttyy 50%
 I dont like this | 9 | Medium Demon; Feature | 0:49 | s1lent | s1lent | 0LkCaXiTRJk | yes | yusttyy 100%
 Goodbye | 8 | Easy Demon; Feature | 0:30 | yusttyy | yusttyy | MN-1RR10JX8 | yes | 
 `;
@@ -130,8 +142,9 @@ DINAMIKA | 2 | Hard | 0:06 | bibis | bibis | sl1KzlnIRWA | yes | yusttyy 100%, s
 `;
 /* ===== ОЧКИ (одинаково для демон и челлендж листа) =====
  FIRST — очки за 1 место, DROP — во сколько раз меньше каждое следующее место
- (0.8 → 100, 80, 64, 51.2 …), VERIFY_BONUS — множитель для верифера уровня. */
-const FIRST=100, DROP=0.8, VERIFY_BONUS=1.1;
+ (0.8 → 100, 80, 64, 51.2 …), VERIFY_BONUS — множитель для верифера уровня,
+ PARTIAL — множитель за рекорд меньше 100% (0.3 → за 50% на топ-1 уровне дают 30 очков; процент не важен, важно что не 100%). */
+const FIRST=100, DROP=0.8, VERIFY_BONUS=1.1, PARTIAL=0.3;
 const pts=r=>+(FIRST*Math.pow(DROP,r-1)).toFixed(2);
 /* ===== логика ===== */
 const $=s=>document.querySelector(s);
@@ -141,7 +154,7 @@ const ytUrl=v=>"https://www.youtube.com/watch?v="+ytId(v);
 let tab="demon", showUnv=false;
 const META={demon:["Демон лист","Топ сложнейших уровней YurtLink GDPS. Чем выше уровень, тем больше очков."],
 challenge:["Челлендж лист","Уровни-челленджи сервера: короткие, но очень требовательные."],
-players:["Лист игроков","Рейтинг по сумме очков за верификации и прохождения."]};
+players:["Лист игроков","Рейтинг по сумме очков за верификации и рекорды."]};
 const THQ=["maxresdefault","sddefault","hqdefault"];
 function thumbFb(im){const n=+im.dataset.n+1;if(n<THQ.length){im.dataset.n=n;im.src="https://img.youtube.com/vi/"+im.dataset.v+"/"+THQ[n]+".jpg"}else im.remove()}
 /* ===== ЦВЕТА СЛОЖНОСТЕЙ =====
@@ -175,14 +188,19 @@ const parseLen=t=>{
  sec=Math.round(sec);
  return {cat:(LEN_STEPS.find(x=>sec<x[1])||["XL"])[0],text:Math.floor(sec/60)+":"+String(sec%60).padStart(2,"0")};
 };
-const lenText=o=>[o.text,o.cat].filter(Boolean).join(" · ");
+const lenText=o=>o.text&&o.cat?`${o.text} (${o.cat})`:(o.text||o.cat||"");
 /* прошли: "ник" = 100%, "ник 72%" = прогресс 72% (работает и для unverified) */
 const parseVic=v=>(v||"").split(",").map(x=>x.trim()).filter(Boolean).map(x=>{
  const m=x.match(/^(.*?)[\s:]*(\d{1,3}(?:[.,]\d+)?)\s*%$/);
  return m&&m[1].trim()?{n:m[1].trim(),p:Math.min(100,parseFloat(m[2].replace(",","."))||0)}:{n:x,p:100};
 });
 const fullN=l=>new Set([...(l.verified?[l.verifier]:[]),...l.victors.filter(v=>v.p>=100).map(v=>v.n)]).size;
-const bestP=l=>{const full=new Set([...(l.verified?[l.verifier]:[]),...l.victors.filter(v=>v.p>=100).map(v=>v.n)]);return Math.max(0,...l.victors.filter(v=>v.p<100&&!full.has(v.n)).map(v=>v.p))};
+const bestP=l=>{
+ /* Показываем лучший прогресс только если уровень unverified, либо среди обычных игроков (без верифера) никто не набрал 100% */
+ const pool=l.verified?l.victors.filter(v=>v.n!==l.verifier):l.victors;
+ if(l.verified&&pool.some(v=>v.p>=100))return 0;
+ return Math.max(0,...pool.map(v=>v.p));
+};
 const parse=t=>t.trim().split("\n").filter(s=>s.trim()&&!s.trim().startsWith("#")).map(s=>{
  const [name,id,dr,time,creator,verifier,yt,ver,v]=s.split("|").map(x=>x.trim());
  const [diff,rar]=(dr||"").split(";").map(x=>x.trim());
@@ -195,10 +213,11 @@ function build(){
 const L=build();
 function players(){
  const m={};
- const add=(n,pts,lvl,v,t)=>{const p=m[n]||(m[n]={n,pts:0,list:[],ver:0,dem:[],chal:[]});p.pts+=pts;p.list.push(lvl);(t==="d"?p.dem:p.chal).push({name:lvl,v});if(v)p.ver++};
+ const add=(n,pts,lvl,v,t,pc=100)=>{const p=m[n]||(m[n]={n,pts:0,list:[],ver:0,dem:[],chal:[]});p.pts+=pts;p.list.push(lvl);(t==="d"?p.dem:p.chal).push({name:lvl,v,pc});if(v)p.ver++};
  [["d",L.demon],["c",L.challenge]].forEach(([t,arr])=>arr.forEach(l=>{if(!l.verified)return;
   add(l.verifier,+(l.pts*VERIFY_BONUS).toFixed(2),l.name,true,t);
-  l.victors.forEach(v=>{if(v.p>=100&&v.n!==l.verifier)add(v.n,l.pts,l.name,false,t)});
+  const bp=new Map();l.victors.forEach(v=>bp.set(v.n,Math.max(bp.get(v.n)||0,v.p)));
+  bp.forEach((pc,n)=>{if(n===l.verifier||pc<=0)return;add(n,pc>=100?l.pts:+(l.pts*PARTIAL).toFixed(2),l.name,false,t,pc)});
  }));
  return Object.values(m).sort((a,b)=>b.pts-a.pts);
 }
@@ -232,8 +251,8 @@ const levelDetail=l=>{
  const ppl=[...(l.verified?[{n:l.verifier,p:100,v:1}]:[]),...[...best].map(([n,p])=>({n,p})).sort((a,b)=>b.p-a.p)];
  return `<div class="det-in"><div class="dbody"><div class="vid">${vid}</div><div class="side">
  <div class="grid"><div>Создатель<b>${esc(l.creator)}</b></div><div>Верифер<b>${esc(l.verifier||"—")}</b></div><div>ID уровня<b>${l.id}</b></div>${l.len?`<div>Длина<b>${esc(lenText(l.len))}</b></div>`:""}<div>Очки<b>${l.verified?l.pts:"—"}</b></div>${l.verified?"":'<div>Статус<b style="color:#ffb14d">Unverified</b></div>'}${l.diff?`<div>Сложность<b style="color:${dc(l.diff)}">${faceImg(l)}${esc(l.diff)}</b></div>`:""}</div>
- <h4 style="margin:12px 0 6px">Прохождения · ${ppl.filter(x=>x.p>=100).length}</h4>
- <div class="tags" style="padding:0">${ppl.map(x=>`<span class="tag ${x.p>=100?"ok":"u"}">${esc(x.n)}${x.v?" ✓":""} · ${+x.p.toFixed(1)}%</span>`).join("")||'<span class="meta">—</span>'}</div>
+ <h4 style="margin:12px 0 8px">Рекорды · ${ppl.length}</h4>
+ ${ppl.length?`<div class="wrap"><table class="rec"><tr><th>#</th><th>Игрок</th><th>Прогресс</th><th class="r">Очки</th></tr>${ppl.map((x,k)=>{const full=x.p>=100,pc=+x.p.toFixed(1),pt=!l.verified?"—":x.v?+(l.pts*VERIFY_BONUS).toFixed(2):full?l.pts:x.p>0?+(l.pts*PARTIAL).toFixed(2):0;return `<tr><td>${k+1}</td><td><b>${esc(x.n)}</b>${x.v?' <span class="vf" title="Верифер">✓</span>':""}</td><td class="${full?"":"part"}"><span class="pc">${pc}%</span><span class="bar"><i style="width:${Math.min(100,pc)}%"></i></span></td><td class="r">${pt}</td></tr>`}).join("")}</table></div>`:'<div class="meta">—</div>'}
  ${ok?`<p style="margin:14px 0 0"><a class="btn g" target="_blank" rel="noopener" href="${ytUrl(l.yt)}">Открыть на YouTube</a></p>`:""}
  </div></div></div>`;
 };
@@ -245,7 +264,7 @@ function toggleLvl(c){
  requestAnimationFrame(()=>c.classList.add("open"));
  setTimeout(()=>c.scrollIntoView({behavior:"smooth",block:"nearest"}),340);
 }
-const sec=(title,arr,c)=>`<h4 style="margin:14px 0 6px">${title} · ${arr.length}</h4><div class="tags" style="padding:0">${arr.length?arr.map(x=>`<span class="tag ${c}">${esc(x.name)}${x.v?" ✓":""}</span>`).join(""):'<span class="meta">—</span>'}</div>`;
+const sec=(title,arr,c)=>`<h4 style="margin:14px 0 6px">${title} · ${arr.length}</h4><div class="tags" style="padding:0">${arr.length?arr.map(x=>`<span class="tag ${c}">${esc(x.name)}${x.v?" ✓":""}${x.pc<100?` · ${+x.pc.toFixed(1)}%`:""}</span>`).join(""):'<span class="meta">—</span>'}</div>`;
 function openPlayer(n){
  const p=players().find(x=>x.n===n);
  $("#box").innerHTML=`<div class="body"><h2 style="margin:0 0 4px">${esc(p.n)}</h2><div class="meta">${p.pts.toFixed(2)} очков · ${p.ver} верификаций</div>
