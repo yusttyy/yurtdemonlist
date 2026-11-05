@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>YurtLink GDPS — Demonlist</title>
+<title>YLGDPS Demonlist</title>
 <style>
 :root{color-scheme:dark;--bg:#0d1218;--card:#151c25;--card2:#1c2530;--line:#273241;--line2:#3a4a5e;--tx:#e8edf3;--mut:#93a1b2;--acc:#7dd3c0;--acc2:#5aa9e6;--ok:#8fd9ad;--amb:#e8bd72;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
 *{box-sizing:border-box}html{scroll-padding-top:env(safe-area-inset-top,0px);scrollbar-color:#2b3745 transparent}
@@ -117,16 +117,16 @@ footer{text-align:center;color:#c3ced9;font-size:12.5px;padding:12px 20px 26px;t
 <script>
 /* ===== ДАННЫЕ — редактируй только тут =====
  Одна строка = один уровень. Порядок строк = место в списке (первая строка — топ 1).
- Формат:  Название | ID уровня | Сложность (можно пустой; через ; редкость из папки faces: Easy Demon; Epic — без редкости берётся none) | Время (можно пустым) | Создатель | Верифер | ссылка или ID ютуб видео | yes/no (верифицирован?) | прошли (через запятую)
+ Формат:  Название | ID уровня | Сложность (можно пустой; через ; редкость из папки faces: Easy Demon; Epic — без редкости берётся none) | Время (можно пустым) | Создатель | Верифер | ссылка или ID ютуб видео | yes/no (верифицирован?) | прошли (через запятую; можно с процентом: ник 72%, без процента = 100%; меньше 100% очков не даёт)
  Строки, начинающиеся с #, игнорируются. */
 const DEMONS=`
-Renaissance | - | Extreme Demon | - | yusttyy | yusttyy | XXXXXXXXXXX | no | 
-I dont like this | 9 | Medium Demon; Feature | 0:49 | s1lent | s1lent | 0LkCaXiTRJk | yes | yusttyy
+Renaissance | - | Extreme Demon; Legendary | - | yusttyy | yusttyy 50% | XXXXXXXXXXX | no | 
+I dont like this | 9 | Medium Demon; Feature | 0:49 | s1lent | s1lent | 0LkCaXiTRJk | yes | yusttyy 100%
 Goodbye | 8 | Easy Demon; Feature | 0:30 | yusttyy | yusttyy | MN-1RR10JX8 | yes | 
 `;
 const CHALLENGES=`
 SINERACK | 4 | Insane | 0:04 | yusttyy | yusttyy | oXLW1KTzgbs | yes | 
-DINAMIKA | 2 | Hard | 0:06 | bibis | bibis | sl1KzlnIRWA | yes | yusttyy, s1lent, randomdude
+DINAMIKA | 2 | Hard | 0:06 | bibis | bibis | sl1KzlnIRWA | yes | yusttyy 100%, s1lent 100%, randomdude 50%
 `;
 /* ===== ОЧКИ (одинаково для демон и челлендж листа) =====
  FIRST — очки за 1 место, DROP — во сколько раз меньше каждое следующее место
@@ -176,10 +176,17 @@ const parseLen=t=>{
  return {cat:(LEN_STEPS.find(x=>sec<x[1])||["XL"])[0],text:Math.floor(sec/60)+":"+String(sec%60).padStart(2,"0")};
 };
 const lenText=o=>[o.text,o.cat].filter(Boolean).join(" · ");
+/* прошли: "ник" = 100%, "ник 72%" = прогресс 72% (работает и для unverified) */
+const parseVic=v=>(v||"").split(",").map(x=>x.trim()).filter(Boolean).map(x=>{
+ const m=x.match(/^(.*?)[\s:]*(\d{1,3}(?:[.,]\d+)?)\s*%$/);
+ return m&&m[1].trim()?{n:m[1].trim(),p:Math.min(100,parseFloat(m[2].replace(",","."))||0)}:{n:x,p:100};
+});
+const fullN=l=>new Set([...(l.verified?[l.verifier]:[]),...l.victors.filter(v=>v.p>=100).map(v=>v.n)]).size;
+const bestP=l=>{const full=new Set([...(l.verified?[l.verifier]:[]),...l.victors.filter(v=>v.p>=100).map(v=>v.n)]);return Math.max(0,...l.victors.filter(v=>v.p<100&&!full.has(v.n)).map(v=>v.p))};
 const parse=t=>t.trim().split("\n").filter(s=>s.trim()&&!s.trim().startsWith("#")).map(s=>{
  const [name,id,dr,time,creator,verifier,yt,ver,v]=s.split("|").map(x=>x.trim());
  const [diff,rar]=(dr||"").split(";").map(x=>x.trim());
- return {name,id,diff,rarity:(rar||"none").toLowerCase().replace(/[^a-z0-9_-]/g,"")||"none",len:parseLen(time),creator,verifier,yt,verified:!/^(no|n|false|0)$/i.test(ver||""),victors:(v||"").split(",").map(x=>x.trim()).filter(Boolean)};
+ return {name,id,diff,rarity:(rar||"none").toLowerCase().replace(/[^a-z0-9_-]/g,"")||"none",len:parseLen(time),creator,verifier,yt,verified:!/^(no|n|false|0)$/i.test(ver||""),victors:parseVic(v)};
 });
 function build(){
  const mk=(t,f)=>{let r=0;return parse(t).map((l,k)=>l.verified?({...l,idx:k,rank:++r,pts:f(r)}):({...l,idx:k,rank:0,pts:0}))};
@@ -191,7 +198,7 @@ function players(){
  const add=(n,pts,lvl,v,t)=>{const p=m[n]||(m[n]={n,pts:0,list:[],ver:0,dem:[],chal:[]});p.pts+=pts;p.list.push(lvl);(t==="d"?p.dem:p.chal).push({name:lvl,v});if(v)p.ver++};
  [["d",L.demon],["c",L.challenge]].forEach(([t,arr])=>arr.forEach(l=>{if(!l.verified)return;
   add(l.verifier,+(l.pts*VERIFY_BONUS).toFixed(2),l.name,true,t);
-  l.victors.forEach(n=>{if(n!==l.verifier)add(n,l.pts,l.name,false,t)});
+  l.victors.forEach(v=>{if(v.p>=100&&v.n!==l.verifier)add(v.n,l.pts,l.name,false,t)});
  }));
  return Object.values(m).sort((a,b)=>b.pts-a.pts);
 }
@@ -214,17 +221,19 @@ function render(){
  if(!arr.length){o.innerHTML='<div class="empty">Ничего не найдено</div>';return}
  o.innerHTML=arr.map(l=>`<div class="lvl" data-i="${l.idx}" style="--dc:${dc(l.diff)}"><div class="head">${thumb(l,showUnv?l.idx+1:l.rank)}<div class="info"><h3>${esc(l.name)}<span class="by">by ${esc(l.creator)}</span></h3>${l.diff?`<div class="dfc">${faceImg(l)}<b style="color:${dc(l.diff)}">${esc(l.diff)}</b></div>`:""}
  <div class="meta">Верифер: <b>${esc(l.verifier||"—")}</b> · ID: <b>${l.id}</b>${l.len?` · ⏱ <b>${esc(lenText(l.len))}</b>`:""}</div>
- <div class="tags">${l.verified?`<span class="tag p">${l.pts} очков</span>`:'<span class="tag u">Unverified</span>'}<span class="tag ok">${new Set(l.verified?[l.verifier,...l.victors]:l.victors).size} прошли</span></div></div><span class="chev">▾</span></div><div class="det"></div></div>`).join("");
+ <div class="tags">${l.verified?`<span class="tag p">${l.pts} очков</span>`:'<span class="tag u">Unverified</span>'}<span class="tag ok">${fullN(l)} прошли</span>${bestP(l)?`<span class="tag u">лучший прогресс: ${+bestP(l).toFixed(1)}%</span>`:""}</div></div><span class="chev">▾</span></div><div class="det"></div></div>`).join("");
 }
 const levelDetail=l=>{
  const i=ytId(l.yt), ok=i&&!/^x+$/i.test(i);
  const web=/^https?:/.test(location.protocol);
  const vid=ok&&web?`<iframe src="https://www.youtube.com/embed/${i}?rel=0&origin=${encodeURIComponent(location.origin)}" title="${esc(l.name)}" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>`:`<div class="novid" style="padding:16px;text-align:center">${ok?"Встроенный плеер YouTube не работает, когда сайт открыт как файл с диска (ошибка 153). Запусти сайт через хостинг или локальный сервер. Пока смотри по кнопке ниже.":"Видео ещё не добавлено"}</div>`;
- const ppl=l.verified?[l.verifier,...l.victors.filter(n=>n!==l.verifier)]:[...new Set(l.victors)];
+ const best=new Map();l.victors.forEach(v=>best.set(v.n,Math.max(best.get(v.n)||0,v.p)));
+ if(l.verified)best.delete(l.verifier);
+ const ppl=[...(l.verified?[{n:l.verifier,p:100,v:1}]:[]),...[...best].map(([n,p])=>({n,p})).sort((a,b)=>b.p-a.p)];
  return `<div class="det-in"><div class="dbody"><div class="vid">${vid}</div><div class="side">
  <div class="grid"><div>Создатель<b>${esc(l.creator)}</b></div><div>Верифер<b>${esc(l.verifier||"—")}</b></div><div>ID уровня<b>${l.id}</b></div>${l.len?`<div>Длина<b>${esc(lenText(l.len))}</b></div>`:""}<div>Очки<b>${l.verified?l.pts:"—"}</b></div>${l.verified?"":'<div>Статус<b style="color:#ffb14d">Unverified</b></div>'}${l.diff?`<div>Сложность<b style="color:${dc(l.diff)}">${faceImg(l)}${esc(l.diff)}</b></div>`:""}</div>
- <h4 style="margin:12px 0 6px">Прохождения · ${ppl.length}</h4>
- <div class="tags" style="padding:0">${ppl.map((n,k)=>`<span class="tag ok">${esc(n)}${l.verified&&!k?" ✓":""}</span>`).join("")||'<span class="meta">—</span>'}</div>
+ <h4 style="margin:12px 0 6px">Прохождения · ${ppl.filter(x=>x.p>=100).length}</h4>
+ <div class="tags" style="padding:0">${ppl.map(x=>`<span class="tag ${x.p>=100?"ok":"u"}">${esc(x.n)}${x.v?" ✓":""} · ${+x.p.toFixed(1)}%</span>`).join("")||'<span class="meta">—</span>'}</div>
  ${ok?`<p style="margin:14px 0 0"><a class="btn g" target="_blank" rel="noopener" href="${ytUrl(l.yt)}">Открыть на YouTube</a></p>`:""}
  </div></div></div>`;
 };
