@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>YLGDPS Demonlist</title>
+<title>YurtLink GDPS — Demonlist</title>
 <style>
 :root{color-scheme:dark;--bg:#0d1218;--card:#151c25;--card2:#1c2530;--line:#273241;--line2:#3a4a5e;--tx:#e8edf3;--mut:#93a1b2;--acc:#7dd3c0;--acc2:#5aa9e6;--ok:#8fd9ad;--amb:#e8bd72;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
 *{box-sizing:border-box}html{scroll-padding-top:env(safe-area-inset-top,0px);scrollbar-color:#2b3745 transparent}
@@ -44,9 +44,10 @@ input[type=search]:focus{outline:0;border-color:var(--acc);box-shadow:0 0 0 3px 
 .rank{position:absolute;left:8px;top:8px;background:#0b1117c8;backdrop-filter:blur(6px);padding:3px 11px;border-radius:9px;font-weight:700;font-size:14px;border:1px solid #ffffff1a}
 .info{padding:2px 4px 2px 0;flex:1;min-width:0;display:flex;flex-direction:column;gap:6px}
 .info h3{margin:0;font-size:20px;font-weight:700;letter-spacing:.2px}
-.dfc{display:flex;align-items:center;gap:10px;min-height:46px;white-space:nowrap}
-.dfc b{font-size:16px;font-weight:700;line-height:1}
-.face{height:46px;width:auto;flex:none;display:block;filter:drop-shadow(0 2px 6px #0007)}
+.dfc{display:flex;align-items:center;gap:4px;min-height:34px;white-space:nowrap}
+.dfc b{font-size:18px;font-weight:700;line-height:1}
+.face{height:34px;width:auto;flex:none;display:block;filter:drop-shadow(0 2px 6px #0007)}
+.by{font-size:14px;font-weight:500;color:var(--mut);opacity:.7;margin-left:8px}
 .meta{color:var(--mut);font-size:13.5px}.meta b{color:var(--tx);font-weight:600}
 .tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:auto;padding-top:6px}
 .tag{font-size:12.5px;padding:4px 11px;border-radius:99px;background:#1f2a36;border:1px solid var(--line);color:var(--mut)}
@@ -65,8 +66,8 @@ input[type=search]:focus{outline:0;border-color:var(--acc);box-shadow:0 0 0 3px 
 .grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin:0 0 12px}
 .grid div{background:var(--card2);border:1px solid var(--line);padding:10px 14px;border-radius:12px;font-size:12.5px;color:var(--mut)}
 .grid b{display:block;color:var(--tx);font-size:15px;font-weight:600;margin-top:3px}
-.grid b:has(.face){display:flex;align-items:center;gap:10px}
-.grid .face{height:38px}
+.grid b:has(.face){display:flex;align-items:center;gap:4px}
+.grid .face{height:30px}
 h4{margin:0;font-size:14px;font-weight:600;color:var(--tx)}
 .tbl{width:100%;border-collapse:separate;border-spacing:0;background:var(--card);border:1px solid var(--line);border-radius:16px;overflow:hidden}
 .tbl th,.tbl td{padding:13px 16px;text-align:left;border-bottom:1px solid var(--line);font-size:14px}
@@ -211,10 +212,9 @@ function render(){
  }
  const arr=L[tab].filter(l=>(showUnv||l.verified)&&(!q||[l.name,l.creator,l.verifier,l.id].join(" ").toLowerCase().includes(q)));
  if(!arr.length){o.innerHTML='<div class="empty">Ничего не найдено</div>';return}
- o.innerHTML=arr.map(l=>`<div class="lvl" data-i="${l.idx}" style="--dc:${dc(l.diff)}"><div class="head">${thumb(l,showUnv?l.idx+1:l.rank)}<div class="info"><h3>${esc(l.name)}</h3>${l.diff?`<div class="dfc">${faceImg(l)}<b style="color:${dc(l.diff)}">${esc(l.diff)}</b></div>`:""}
- <div class="meta">Создатель: <b>${esc(l.creator)}</b> · Верифер: <b>${esc(l.verifier||"—")}</b></div>
- <div class="meta">ID: <b>${l.id}</b></div>
- <div class="tags">${l.verified?`<span class="tag p">${l.pts} очков</span>`:'<span class="tag u">Unverified</span>'}<span class="tag ok">${new Set(l.verified?[l.verifier,...l.victors]:l.victors).size} прошли</span>${l.len?`<span class="tag">⏱ ${esc(lenText(l.len))}</span>`:""}</div></div><span class="chev">▾</span></div><div class="det"></div></div>`).join("");
+ o.innerHTML=arr.map(l=>`<div class="lvl" data-i="${l.idx}" style="--dc:${dc(l.diff)}"><div class="head">${thumb(l,showUnv?l.idx+1:l.rank)}<div class="info"><h3>${esc(l.name)}<span class="by">by ${esc(l.creator)}</span></h3>${l.diff?`<div class="dfc">${faceImg(l)}<b style="color:${dc(l.diff)}">${esc(l.diff)}</b></div>`:""}
+ <div class="meta">Верифер: <b>${esc(l.verifier||"—")}</b> · ID: <b>${l.id}</b>${l.len?` · ⏱ <b>${esc(lenText(l.len))}</b>`:""}</div>
+ <div class="tags">${l.verified?`<span class="tag p">${l.pts} очков</span>`:'<span class="tag u">Unverified</span>'}<span class="tag ok">${new Set(l.verified?[l.verifier,...l.victors]:l.victors).size} прошли</span></div></div><span class="chev">▾</span></div><div class="det"></div></div>`).join("");
 }
 const levelDetail=l=>{
  const i=ytId(l.yt), ok=i&&!/^x+$/i.test(i);
