@@ -160,7 +160,7 @@ footer{text-align:center;color:var(--mut);font-size:13px;padding:16px 20px calc(
 </style>
 <script>
 /* ФОНЫ: список файлов меняй тут */
-window.BG={list:["bg1.jpg","bg2.jpg","bg3.jpg"],key:"ylgdps-bg",i:0};
+window.BG={list:["bg1.jpg","bg2.jpg","bg3.jpg"],names:["Renaissance","Nebula","Goodbye"],key:"ylgdps-bg",i:0};
 try{var v=+localStorage.getItem(BG.key);if(v>=0&&v<BG.list.length)BG.i=v}catch(e){}
 document.documentElement.style.setProperty("--bgimg","url("+BG.list[BG.i]+")");
 </script>
@@ -375,7 +375,7 @@ render();
 <script>
 (()=>{
  const B=window.BG,btn=document.getElementById("bgbtn"),pop=document.getElementById("bgpop");
- pop.innerHTML=B.list.map((f,k)=>`<button type="button" class="bgopt" data-k="${k}" aria-pressed="${k===B.i}"><img src="${f}" alt="" loading="lazy">Фон ${k+1}</button>`).join("");
+ pop.innerHTML=B.list.map((f,k)=>`<button type="button" class="bgopt" data-k="${k}" aria-pressed="${k===B.i}"><img src="${f}" alt="" loading="lazy">${B.names&&B.names[k]||"Фон "+(k+1)}</button>`).join("");
  const set=k=>{B.i=k;document.documentElement.style.setProperty("--bgimg","url("+B.list[k]+")");pop.querySelectorAll(".bgopt").forEach((x,j)=>x.setAttribute("aria-pressed",j===k));try{localStorage.setItem(B.key,k)}catch(e){}};
  const open=o=>{pop.hidden=!o;btn.setAttribute("aria-expanded",o)};
  btn.onclick=e=>{e.stopPropagation();open(pop.hidden)};
