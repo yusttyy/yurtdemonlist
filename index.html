@@ -195,6 +195,17 @@ footer{text-align:center;color:var(--mut);font-size:13px;padding:16px 20px calc(
 .tags .tag.ok~.tag.u{display:none}
 }
 @media(max-width:640px){.tools{flex-wrap:nowrap}input[type=search]{min-width:0}.sw{flex:none}}
+.tbl .sub{display:none}
+@media(max-width:640px){
+.tbl{table-layout:fixed}
+.tbl th,.tbl td{padding:10px 12px;font-size:13.5px}
+.tbl th:nth-child(3),.tbl td:nth-child(3),.tbl th:nth-child(4),.tbl td:nth-child(4){display:none}
+.tbl th:first-child,.tbl td:first-child{width:44px;padding-right:0}
+.tbl th:last-child,.tbl td:last-child{width:84px;text-align:right;font-variant-numeric:tabular-nums}
+.tbl td:nth-child(2){overflow:hidden}
+.tbl td:nth-child(2) b{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tbl .sub{display:block;color:var(--mut);font-size:12px;line-height:1.3;margin-top:1px}
+}
 @media(max-width:400px){.sw{font-size:0;gap:0;padding:9px 11px}}
 footer a{color:var(--tx);text-decoration:underline;text-decoration-color:#5a5e6880;text-underline-offset:3px;transition:text-decoration-color .15s}
 footer a:hover{text-decoration-color:var(--tx)}
@@ -250,7 +261,7 @@ const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",
 const ytId=v=>{const m=String(v||"").match(/(?:v=|youtu\.be\/|embed\/)?([\w-]{11})/);return m?m[1]:""};
 const ytUrl=v=>"https://www.youtube.com/watch?v="+ytId(v);
 let tab="demon", showUnv=false;
-const META={demon:["Демон лист","Топ сложнейших уровней. Чем выше уровень, тем больше очков."],
+const META={demon:["Демон лист","Топ сложнейших уровней YurtLink GDPS. Чем выше уровень, тем больше очков."],
 challenge:["Челлендж лист","Уровни-челленджи сервера: короткие, но очень требовательные."],
 players:["Лист игроков","Рейтинг по сумме очков за верификации и рекорды."]};
 const THQ=["maxresdefault","sddefault","hqdefault"];
@@ -337,7 +348,7 @@ function render(){
   if(!P.length){o.innerHTML='<div class="empty">Ничего не найдено</div>';return}
   const pod=q?[]:all.slice(0,3), rest=q?P:all.slice(3);
   const podHtml=pod.length?`<div class="podium">${[1,0,2].filter(i=>pod[i]).map(i=>{const p=pod[i];return `<div class="pod p${i+1}" data-p="${esc(p.n)}">${i?"":'<div class="cr">👑</div>'}<div class="av"><svg viewBox="0 0 250 250" aria-hidden="true"><path class="o" fill-rule="evenodd" d="M6 6H244V244H6Z M64 64V186H186V64Z" stroke="#000" stroke-width="12" stroke-linejoin="miter"/><rect x="64" y="64" width="122" height="122" fill="none" stroke="#000" stroke-width="12"/><rect class="i" x="96" y="96" width="58" height="58" rx="10" stroke="#000" stroke-width="12"/></svg></div><div class="pn">${esc(p.n)}</div><div class="pp">${p.pts.toFixed(2)} очков</div><div class="step"><span>${i+1}</span></div></div>`}).join("")}</div>`:"";
-  const tbl=rest.length?`<div class="wrap"><table class="tbl"><tr><th>#</th><th>Игрок</th><th>Уровней</th><th>Верификаций</th><th>Очки</th></tr>${rest.map(p=>`<tr class="row" data-p="${esc(p.n)}"><td class="${p.rank<4?"top"+p.rank:""}"><b>${p.rank}</b></td><td><b>${esc(p.n)}</b></td><td>${p.list.length}</td><td>${p.ver}</td><td><b>${p.pts.toFixed(2)}</b></td></tr>`).join("")}</table></div>`:"";
+  const tbl=rest.length?`<div class="wrap"><table class="tbl"><tr><th>#</th><th>Игрок</th><th>Уровней</th><th>Верификаций</th><th>Очки</th></tr>${rest.map(p=>`<tr class="row" data-p="${esc(p.n)}"><td class="${p.rank<4?"top"+p.rank:""}"><b>${p.rank}</b></td><td><b>${esc(p.n)}</b><span class="sub">${p.list.length} ур.${p.ver?" · "+p.ver+" вер.":""}</span></td><td>${p.list.length}</td><td>${p.ver}</td><td><b>${p.pts.toFixed(2)}</b></td></tr>`).join("")}</table></div>`:"";
   o.innerHTML=podHtml+tbl;
   return;
  }
