@@ -60,6 +60,7 @@ input[type=search]:focus{outline:0;border-color:#5a5e68;box-shadow:0 0 0 3px #ff
 .thumb{position:relative;width:240px;flex:none;aspect-ratio:16/9;border-radius:6px;overflow:hidden;background:#2a2d33;display:grid;place-items:center}
 .thumb img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
 .thumb .pl{font-size:24px;opacity:.35}
+.thumb .bl{display:none}
 .rank{position:absolute;z-index:2;left:6px;top:6px;background:rgba(8,9,10,.88);border:1px solid rgba(255,255,255,.3);padding:2px 9px;border-radius:7px;font-weight:700;font-size:14px;line-height:1.5;color:#fff;text-shadow:0 1px 2px #000;box-shadow:0 2px 8px rgba(0,0,0,.55);font-variant-numeric:tabular-nums}
 .info{padding:2px 4px 2px 0;flex:1;min-width:0;display:flex;flex-direction:column;gap:5px}
 .info h3{margin:0;font-size:17px;font-weight:600;letter-spacing:-.01em;overflow-wrap:anywhere}
@@ -181,7 +182,8 @@ footer{text-align:center;color:var(--mut);font-size:13px;padding:16px 20px calc(
 .thumb{position:absolute;inset:0;width:100%;height:100%;aspect-ratio:auto;border-radius:0}
 .chev{display:grid;position:absolute;top:8px;right:8px;z-index:2;width:28px;height:28px;margin:0;border-radius:50%;place-items:center;font-size:13px;color:var(--tx);background:rgba(10,11,13,.55);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)}
 .info{position:absolute;z-index:1;left:0;right:0;bottom:0;padding:78px 14px 12px;flex-direction:row;flex-wrap:wrap;align-items:center;gap:4px 8px}
-.info::before{content:"";position:absolute;z-index:-1;inset:0;background:linear-gradient(rgba(10,11,13,0),rgba(10,11,13,.82) 72px);-webkit-backdrop-filter:blur(16px) saturate(1.25);backdrop-filter:blur(16px) saturate(1.25);-webkit-mask-image:linear-gradient(transparent,#000 72px);mask-image:linear-gradient(transparent,#000 72px)}
+.thumb .bl{display:block;filter:blur(14px) saturate(1.25);transform:scale(1.12);-webkit-mask-image:linear-gradient(transparent 40%,#000 75%);mask-image:linear-gradient(transparent 40%,#000 75%);pointer-events:none}
+.info::before{content:"";position:absolute;z-index:-1;inset:0;background:linear-gradient(rgba(10,11,13,0),rgba(10,11,13,.82) 72px)}
 .info h3,.by,.dfc b{text-shadow:0 1px 6px rgba(0,0,0,.55)}
 .info h3{flex:0 0 100%;font-size:15px;line-height:1.25;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden}
 .by{display:inline;margin-left:6px;font-size:12.5px;color:#c4c7cf}
@@ -192,7 +194,6 @@ footer{text-align:center;color:var(--mut);font-size:13px;padding:16px 20px calc(
 .tag{font-size:11.5px;padding:2px 8px;background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.14)}
 .tags .tag.ok~.tag.u{display:none}
 }
-@supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){@media(max-width:640px){.info::before{background:linear-gradient(rgba(10,11,13,0),rgba(10,11,13,.92) 72px)}}}
 @media(max-width:640px){.tools{flex-wrap:nowrap}input[type=search]{min-width:0}.sw{flex:none}}
 @media(max-width:400px){.sw{font-size:0;gap:0;padding:9px 11px}}
 footer a{color:var(--tx);text-decoration:underline;text-decoration-color:#5a5e6880;text-underline-offset:3px;transition:text-decoration-color .15s}
@@ -253,6 +254,7 @@ const META={demon:["Демон лист","Топ сложнейших уровн
 challenge:["Челлендж лист","Уровни-челленджи сервера: короткие, но очень требовательные."],
 players:["Лист игроков","Рейтинг по сумме очков за верификации и рекорды."]};
 const THQ=["maxresdefault","sddefault","hqdefault"];
+function blSync(im){const b=im.parentNode.querySelector(".bl");if(b&&b.src!==im.src)b.src=im.src}
 function thumbFb(im){const n=+im.dataset.n+1;if(n<THQ.length){im.dataset.n=n;im.src="https://img.youtube.com/vi/"+im.dataset.v+"/"+THQ[n]+".jpg"}else im.remove()}
 /* ===== ЦВЕТА СЛОЖНОСТЕЙ =====
  Если в названии есть слово "demon" — берётся палитра демонов; иначе палитра зависит от листа
@@ -266,7 +268,7 @@ const faceFile=d=>{const w=(d||"").toLowerCase().split(/[^a-z0-9]+/).filter(Bool
 const faceImg=l=>{const f=faceFile(l.diff);return f?`<img class="face" alt="" src="faces/${l.rarity}/${f}.png" onerror="this.remove()">`:""};
 function thumb(l,rank){
  const i=ytId(l.yt);
- return `<div class="thumb"><span class="pl">▶</span>${i?`<img loading="lazy" alt="" data-v="${i}" data-n="0" src="https://img.youtube.com/vi/${i}/maxresdefault.jpg" onload="if(this.naturalWidth<200)thumbFb(this)" onerror="thumbFb(this)">`:""}${rank?`<span class="rank">#${rank}</span>`:""}</div>`;
+ return `<div class="thumb"><span class="pl">▶</span>${i?`<img loading="lazy" alt="" data-v="${i}" data-n="0" src="https://img.youtube.com/vi/${i}/maxresdefault.jpg" onload="if(this.naturalWidth<200)thumbFb(this);else blSync(this)" onerror="thumbFb(this)"><img class="bl" alt="" aria-hidden="true">`:""}${rank?`<span class="rank">#${rank}</span>`:""}</div>`;
 }
 /* ===== ДЛИНА УРОВНЯ =====
  Время пишется как 0:45, 1:30 (м:сс) или просто секундами (45). Категория считается сама:
