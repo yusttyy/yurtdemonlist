@@ -5,6 +5,18 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>YLGDPS Demonlist</title>
 <meta name="theme-color" content="#08090a">
+<!-- Превью для Discord и соцсетей. Адрес ниже — GitHub Pages; если сайт на своём домене, замени его (нужна абсолютная https-ссылка) -->
+<meta name="description" content="Топ сложнейших уровней YurtLink GDPS: демоны, челленджи и рейтинг игроков.">
+<meta property="og:type" content="website">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:site_name" content="YurtLink GDPS">
+<meta property="og:title" content="YLGDPS Demonlist">
+<meta property="og:description" content="Топ сложнейших уровней YurtLink GDPS: демоны, челленджи и рейтинг игроков.">
+<meta property="og:url" content="https://yusttyy.github.io/yurtdemonlist/">
+<meta property="og:image" content="https://yusttyy.github.io/yurtdemonlist/preview.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -168,19 +180,23 @@ footer{text-align:center;color:var(--mut);font-size:13px;padding:16px 20px calc(
 .head{display:block;position:relative;height:184px;padding:0}
 .thumb{position:absolute;inset:0;width:100%;height:100%;aspect-ratio:auto;border-radius:0}
 .chev{display:grid;position:absolute;top:8px;right:8px;z-index:2;width:28px;height:28px;margin:0;border-radius:50%;place-items:center;font-size:13px;color:var(--tx);background:rgba(10,11,13,.55);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)}
-.info{position:absolute;z-index:1;left:8px;right:8px;bottom:8px;padding:9px 12px;border-radius:12px;border:1px solid rgba(255,255,255,.14);background:rgba(12,13,16,.55);-webkit-backdrop-filter:blur(14px) saturate(1.3);backdrop-filter:blur(14px) saturate(1.3);box-shadow:0 6px 20px rgba(0,0,0,.35);flex-direction:row;flex-wrap:wrap;align-items:center;gap:4px 8px}
+.info{position:absolute;z-index:1;left:0;right:0;bottom:0;padding:78px 14px 12px;flex-direction:row;flex-wrap:wrap;align-items:center;gap:4px 8px}
+.info::before{content:"";position:absolute;z-index:-1;inset:0;background:linear-gradient(rgba(10,11,13,0),rgba(10,11,13,.82) 72px);-webkit-backdrop-filter:blur(16px) saturate(1.25);backdrop-filter:blur(16px) saturate(1.25);-webkit-mask-image:linear-gradient(transparent,#000 72px);mask-image:linear-gradient(transparent,#000 72px)}
+.info h3,.by,.dfc b{text-shadow:0 1px 6px rgba(0,0,0,.55)}
 .info h3{flex:0 0 100%;font-size:15px;line-height:1.25;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden}
 .by{display:inline;margin-left:6px;font-size:12.5px;color:#c4c7cf}
 .dfc{min-height:0;gap:3px}.dfc b{font-size:12.5px}
 .face{height:22px}
 .lvl .info .meta{display:none}
 .tags{margin:0 0 0 auto;padding:0;gap:5px;justify-content:flex-end}
-.tag{font-size:11.5px;padding:2px 8px}
+.tag{font-size:11.5px;padding:2px 8px;background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.14)}
 .tags .tag.ok~.tag.u{display:none}
 }
-@supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){@media(max-width:640px){.info{background:rgba(12,13,16,.88)}}}
+@supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){@media(max-width:640px){.info::before{background:linear-gradient(rgba(10,11,13,0),rgba(10,11,13,.92) 72px)}}}
 @media(max-width:640px){.tools{flex-wrap:nowrap}input[type=search]{min-width:0}.sw{flex:none}}
 @media(max-width:400px){.sw{font-size:0;gap:0;padding:9px 11px}}
+footer a{color:var(--tx);text-decoration:underline;text-decoration-color:#5a5e6880;text-underline-offset:3px;transition:text-decoration-color .15s}
+footer a:hover{text-decoration-color:var(--tx)}
 @media(prefers-reduced-motion:reduce){.det,.lvl,.pod{transition:none}}
 </style>
 <script>
@@ -203,7 +219,7 @@ document.documentElement.style.setProperty("--bgimg","url("+BG.list[BG.i]+")");
 <div class="tools"><input type="search" id="q" placeholder="Поиск по названию, нику или ID…"><label class="sw" title="Показывать Unverified-уровни"><input type="checkbox" id="unv"><span class="knob"></span>Unverified</label></div>
 <div id="out"></div></main>
 <div class="modal" id="md"><div class="box" id="box"></div></div>
-<footer>YurtLink GDPS · Demonlist · не связано с RobTop Games</footer>
+<footer>Создано для GDPS Discord-сервера <a href="https://dsc.gg/yurtlink" target="_blank" rel="noopener">YurtLink [RU]</a></footer>
 <script>
 /* ===== ДАННЫЕ — редактируй только тут =====
  Одна строка = один уровень. Порядок строк = место в списке (первая строка — топ 1).
