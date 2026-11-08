@@ -48,7 +48,7 @@ input[type=search]:focus{outline:0;border-color:#5a5e68;box-shadow:0 0 0 3px #ff
 .thumb{position:relative;width:240px;flex:none;aspect-ratio:16/9;border-radius:6px;overflow:hidden;background:#2a2d33;display:grid;place-items:center}
 .thumb img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
 .thumb .pl{font-size:24px;opacity:.35}
-.rank{position:absolute;left:6px;top:6px;background:#000000b3;padding:2px 8px;border-radius:5px;font-weight:600;font-size:12.5px;font-variant-numeric:tabular-nums}
+.rank{position:absolute;z-index:2;left:6px;top:6px;background:rgba(8,9,10,.88);border:1px solid rgba(255,255,255,.3);padding:2px 9px;border-radius:7px;font-weight:700;font-size:14px;line-height:1.5;color:#fff;text-shadow:0 1px 2px #000;box-shadow:0 2px 8px rgba(0,0,0,.55);font-variant-numeric:tabular-nums}
 .info{padding:2px 4px 2px 0;flex:1;min-width:0;display:flex;flex-direction:column;gap:5px}
 .info h3{margin:0;font-size:17px;font-weight:600;letter-spacing:-.01em;overflow-wrap:anywhere}
 .by{margin-left:8px;font-size:13.5px;font-weight:400;color:var(--mut)}
@@ -156,6 +156,31 @@ footer{text-align:center;color:var(--mut);font-size:13px;padding:16px 20px calc(
 .rec .bar{min-width:0;width:100%}
 .rec .pc{font-variant-numeric:tabular-nums}
 @media(max-width:640px){.rec th:nth-child(3){width:38%}.rec th:nth-child(4){width:56px}.rec.pt th:first-child,.rec.pt td:first-child{width:44px}}
+.sub{margin-bottom:6px}
+.sum{margin:0 0 24px;font-size:13.5px;color:var(--mut)}
+.sum b{color:var(--tx);font-weight:600;font-variant-numeric:tabular-nums}
+.pl{background:none;border:0;padding:0;font:inherit;color:inherit;cursor:pointer;text-decoration:underline;text-decoration-color:#5a5e6880;text-underline-offset:3px;transition:color .15s,text-decoration-color .15s}
+.pl:hover{color:var(--tx);text-decoration-color:var(--tx)}
+@media(max-width:640px){
+.lvl{margin-bottom:10px}
+.thumb::before{content:"";position:absolute;z-index:1;left:0;right:0;top:0;height:60px;background:linear-gradient(rgba(0,0,0,.6),transparent);pointer-events:none}
+.rank{left:8px;top:8px;font-size:15px}
+.head{display:block;position:relative;height:184px;padding:0}
+.thumb{position:absolute;inset:0;width:100%;height:100%;aspect-ratio:auto;border-radius:0}
+.chev{display:grid;position:absolute;top:8px;right:8px;z-index:2;width:28px;height:28px;margin:0;border-radius:50%;place-items:center;font-size:13px;color:var(--tx);background:rgba(10,11,13,.55);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)}
+.info{position:absolute;z-index:1;left:8px;right:8px;bottom:8px;padding:9px 12px;border-radius:12px;border:1px solid rgba(255,255,255,.14);background:rgba(12,13,16,.55);-webkit-backdrop-filter:blur(14px) saturate(1.3);backdrop-filter:blur(14px) saturate(1.3);box-shadow:0 6px 20px rgba(0,0,0,.35);flex-direction:row;flex-wrap:wrap;align-items:center;gap:4px 8px}
+.info h3{flex:0 0 100%;font-size:15px;line-height:1.25;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden}
+.by{display:inline;margin-left:6px;font-size:12.5px;color:#c4c7cf}
+.dfc{min-height:0;gap:3px}.dfc b{font-size:12.5px}
+.face{height:22px}
+.lvl .info .meta{display:none}
+.tags{margin:0 0 0 auto;padding:0;gap:5px;justify-content:flex-end}
+.tag{font-size:11.5px;padding:2px 8px}
+.tags .tag.ok~.tag.u{display:none}
+}
+@supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){@media(max-width:640px){.info{background:rgba(12,13,16,.88)}}}
+@media(max-width:640px){.tools{flex-wrap:nowrap}input[type=search]{min-width:0}.sw{flex:none}}
+@media(max-width:400px){.sw{font-size:0;gap:0;padding:9px 11px}}
 @media(prefers-reduced-motion:reduce){.det,.lvl,.pod{transition:none}}
 </style>
 <script>
@@ -174,8 +199,8 @@ document.documentElement.style.setProperty("--bgimg","url("+BG.list[BG.i]+")");
 <button data-t="players">Игроки</button>
 </nav>
 <div class="bgwrap"><button id="bgbtn" type="button" aria-haspopup="true" aria-expanded="false" aria-controls="bgpop" title="Сменить фон"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="3"/><circle cx="9" cy="10" r="1.6"/><path d="M21 16l-5-5-8 8"/></svg>Фон</button><div id="bgpop" hidden></div></div></div></header>
-<main><h1 id="ttl"></h1><p class="sub" id="sub"></p>
-<div class="tools"><input type="search" id="q" placeholder="Поиск по названию, нику или ID…"><label class="sw"><input type="checkbox" id="unv"><span class="knob"></span>Unverified</label></div>
+<main><h1 id="ttl"></h1><p class="sub" id="sub"></p><div class="sum" id="sum"></div>
+<div class="tools"><input type="search" id="q" placeholder="Поиск по названию, нику или ID…"><label class="sw" title="Показывать Unverified-уровни"><input type="checkbox" id="unv"><span class="knob"></span>Unverified</label></div>
 <div id="out"></div></main>
 <div class="modal" id="md"><div class="box" id="box"></div></div>
 <footer>YurtLink GDPS · Demonlist · не связано с RobTop Games</footer>
@@ -277,6 +302,12 @@ function players(){
  }));
  return Object.values(m).sort((a,b)=>b.pts-a.pts);
 }
+const PN=new Set(players().map(p=>p.n));
+const nick=s=>{if(!s)return"—";const a=x=>`<button type="button" class="pl" data-p="${esc(x)}">${esc(x)}</button>`;if(PN.has(s))return a(s);return s.split(/(\s*[,&]\s*)/).map(x=>PN.has(x)?a(x):esc(x)).join("")};
+function goPlayer(n){tab="players";document.querySelectorAll("nav button").forEach(x=>x.classList.toggle("on",x.dataset.t==="players"));$("#q").value="";render();window.scrollTo(0,0);openPlayer(n)}
+{const lv=t=>L[t].filter(l=>l.verified).length,recs=players().reduce((a,p)=>a+[...p.dem,...p.chal].filter(x=>x.v||x.pc>=100).length,0);
+const pl=(n,f)=>{const a=n%100,b=n%10;return f[a>10&&a<20?2:b===1?0:b>1&&b<5?1:2]};
+$("#sum").innerHTML=[[lv("demon"),["демон","демона","демонов"]],[lv("challenge"),["челлендж","челленджа","челленджей"]],[PN.size,["игрок","игрока","игроков"]],[recs,["рекорд","рекорда","рекордов"]]].map(([n,f])=>`<b>${n}</b> ${pl(n,f)}`).join(" · ")}
 function render(){
  const q=$("#q").value.trim().toLowerCase();
  $("#ttl").textContent=META[tab][0];$("#sub").textContent=META[tab][1];
@@ -294,8 +325,8 @@ function render(){
  }
  const arr=L[tab].filter(l=>(showUnv||l.verified)&&(!q||[l.name,l.creator,l.verifier,l.id].join(" ").toLowerCase().includes(q)));
  if(!arr.length){o.innerHTML='<div class="empty">Ничего не найдено</div>';return}
- o.innerHTML=arr.map(l=>`<div class="lvl" data-i="${l.idx}" style="--dc:${dc(l.diff)}"><div class="head">${thumb(l,showUnv?l.idx+1:l.rank)}<div class="info"><h3>${esc(l.name)}<span class="by">by ${esc(l.creator)}</span></h3>${l.diff?`<div class="dfc">${faceImg(l)}<b style="color:${dc(l.diff)}">${esc(l.diff)}</b></div>`:""}
- <div class="meta">Верифер: <b>${esc(l.verifier||"—")}</b> · ID: <b>${l.id}</b>${l.len?` · ⏱ <b>${esc(lenText(l.len))}</b>`:""}</div>
+ o.innerHTML=arr.map(l=>`<div class="lvl" data-i="${l.idx}" style="--dc:${dc(l.diff)}"><div class="head">${thumb(l,showUnv?l.idx+1:l.rank)}<div class="info"><h3>${esc(l.name)}<span class="by">by ${nick(l.creator)}</span></h3>${l.diff?`<div class="dfc">${faceImg(l)}<b style="color:${dc(l.diff)}">${esc(l.diff)}</b></div>`:""}
+ <div class="meta">Верифер: <b>${nick(l.verifier)}</b> · ID: <b>${l.id}</b>${l.len?` · ⏱ <b>${esc(lenText(l.len))}</b>`:""}</div>
  <div class="tags">${l.verified?`<span class="tag p">${l.pts} очков</span>`:'<span class="tag u">Unverified</span>'}<span class="tag ok">${fullN(l)} прошли</span>${bestP(l)?`<span class="tag u">Прогресс: ${+bestP(l).toFixed(1)}%</span>`:""}</div></div><span class="chev">▾</span></div><div class="det"></div></div>`).join("");
 }
 const levelDetail=l=>{
@@ -306,7 +337,7 @@ const levelDetail=l=>{
  if(l.verified)best.delete(l.verifier);
  const ppl=[...(l.verified?[{n:l.verifier,p:100,v:1}]:[]),...[...best].map(([n,p])=>({n,p})).sort((a,b)=>b.p-a.p)];
  return `<div class="det-in"><div class="dbody"><div class="vid">${vid}</div><div class="side">
- <div class="grid"><div>Создатель<b>${esc(l.creator)}</b></div><div>Верифер<b>${esc(l.verifier||"—")}</b></div><div>ID уровня<b>${l.id}</b></div>${l.len?`<div>Длина<b>${esc(lenText(l.len))}</b></div>`:""}<div>Очки<b>${l.verified?l.pts:"—"}</b></div>${l.verified?"":'<div>Статус<b style="color:#ffb14d">Unverified</b></div>'}${l.diff?`<div>Сложность<b style="color:${dc(l.diff)}">${faceImg(l)}${esc(l.diff)}</b></div>`:""}</div>
+ <div class="grid"><div>Создатель<b>${nick(l.creator)}</b></div><div>Верифер<b>${nick(l.verifier)}</b></div><div>ID уровня<b>${l.id}</b></div>${l.len?`<div>Длина<b>${esc(lenText(l.len))}</b></div>`:""}<div>Очки<b>${l.verified?l.pts:"—"}</b></div>${l.diff?`<div>Сложность<b style="color:${dc(l.diff)}">${faceImg(l)}${esc(l.diff)}</b></div>`:""}</div>
  <h4 style="margin:12px 0 8px">Рекорды · ${ppl.length}</h4>
  ${ppl.length?`<div class="wrap"><table class="rec"><tr><th>#</th><th>Игрок</th><th>Прогресс</th><th class="r">Очки</th></tr>${ppl.map((x,k)=>{const full=x.p>=100,pc=+x.p.toFixed(1),pt=!l.verified?"—":x.v?+(l.pts*VERIFY_BONUS).toFixed(2):full?l.pts:x.p>0?+(l.pts*PARTIAL).toFixed(2):0;return `<tr><td>${k+1}</td><td><b>${esc(x.n)}</b>${x.v?' <span class="vf" title="Верифер">✓</span>':""}</td><td class="${full?"":"part"}"><span class="pc">${pc}%</span><span class="bar"><i style="width:${Math.min(100,pc)}%"></i></span></td><td class="r">${pt}</td></tr>`}).join("")}</table></div>`:'<div class="meta">—</div>'}
  ${ok?`<p style="margin:14px 0 0"><a class="btn g" target="_blank" rel="noopener" href="${ytUrl(l.yt)}">Открыть на YouTube</a></p>`:""}
@@ -367,6 +398,7 @@ $("#nav").onclick=e=>{const b=e.target.closest("button");if(!b)return;tab=b.data
 $("#q").oninput=render;
 $("#unv").onchange=e=>{showUnv=e.target.checked;render()};
 $("#out").onclick=e=>{
+ const pl=e.target.closest(".pl");if(pl){goPlayer(pl.dataset.p);return}
  const h=e.target.closest(".head");if(h){toggleLvl(h.parentElement);return}
  const r=e.target.closest(".row,.pod");if(r)openPlayer(r.dataset.p);
 };
