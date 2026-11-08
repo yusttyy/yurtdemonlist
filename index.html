@@ -250,7 +250,7 @@ const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",
 const ytId=v=>{const m=String(v||"").match(/(?:v=|youtu\.be\/|embed\/)?([\w-]{11})/);return m?m[1]:""};
 const ytUrl=v=>"https://www.youtube.com/watch?v="+ytId(v);
 let tab="demon", showUnv=false;
-const META={demon:["Демон лист","Топ сложнейших уровней YurtLink GDPS. Чем выше уровень, тем больше очков."],
+const META={demon:["Демон лист","Топ сложнейших уровней. Чем выше уровень, тем больше очков."],
 challenge:["Челлендж лист","Уровни-челленджи сервера: короткие, но очень требовательные."],
 players:["Лист игроков","Рейтинг по сумме очков за верификации и рекорды."]};
 const THQ=["maxresdefault","sddefault","hqdefault"];
