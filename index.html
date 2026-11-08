@@ -334,7 +334,7 @@ function players(){
 const PN=new Set(players().map(p=>p.n));
 const nick=s=>{if(!s)return"—";const a=x=>`<button type="button" class="pl" data-p="${esc(x)}">${esc(x)}</button>`;if(PN.has(s))return a(s);return s.split(/(\s*[,&]\s*)/).map(x=>PN.has(x)?a(x):esc(x)).join("")};
 function goPlayer(n){tab="players";document.querySelectorAll("nav button").forEach(x=>x.classList.toggle("on",x.dataset.t==="players"));$("#q").value="";render();window.scrollTo(0,0);openPlayer(n)}
-{const lv=t=>L[t].filter(l=>l.verified).length,recs=players().reduce((a,p)=>a+[...p.dem,...p.chal].filter(x=>x.v||x.pc>=100).length,0);
+{const lv=t=>L[t].filter(l=>l.verified).length,recs=players().reduce((a,p)=>a+p.dem.length+p.chal.length,0);
 const pl=(n,f)=>{const a=n%100,b=n%10;return f[a>10&&a<20?2:b===1?0:b>1&&b<5?1:2]};
 $("#sum").innerHTML=[[lv("demon"),["демон","демона","демонов"]],[lv("challenge"),["челлендж","челленджа","челленджей"]],[PN.size,["игрок","игрока","игроков"]],[recs,["рекорд","рекорда","рекордов"]]].map(([n,f])=>`<b>${n}</b> ${pl(n,f)}`).join(" · ")}
 function render(){
