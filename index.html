@@ -5,6 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>YLGDPS Demonlist</title>
 <meta name="theme-color" content="#08090a">
+<link rel="icon" type="image/png" href="icon.png">
+<link rel="apple-touch-icon" href="icon.png">
 <!-- Превью для Discord и соцсетей. Адрес ниже — GitHub Pages; если сайт на своём домене, замени его (нужна абсолютная https-ссылка) -->
 <meta name="description" content="Топ сложнейших уровней YurtLink GDPS: демоны, челленджи и рейтинг игроков.">
 <meta property="og:type" content="website">
@@ -127,6 +129,10 @@ h4{margin:0;font-size:13px;font-weight:600}
 .btn.g{background:var(--panel2);border:1px solid var(--line2);color:var(--tx)}
 .btn.g:hover{filter:brightness(1.25)}
 .empty{color:var(--mut);text-align:center;padding:48px 16px}
+.free{display:flex;align-items:center;gap:16px;padding:16px 18px;margin-bottom:10px;border:1px dashed var(--line2);border-radius:10px;background:#1b1d2199;color:var(--mut)}
+.free .fn{flex:none;min-width:44px;text-align:center;background:rgba(8,9,10,.88);border:1px solid var(--line2);padding:2px 9px;border-radius:7px;font-weight:700;font-size:14px;color:var(--mut);font-variant-numeric:tabular-nums}
+.free b{display:block;color:var(--tx);font-weight:600;font-size:15px}
+.free span:not(.fn){font-size:13px}
 footer{text-align:center;color:var(--mut);font-size:13px;padding:16px 20px calc(28px + env(safe-area-inset-bottom,0px))}
 @media(max-width:640px){.top-in{padding:0 14px}.logo{font-size:15px}nav button{padding:0 9px}nav button.on::after{left:9px;right:9px}main{padding:24px 14px 20px}.podium{gap:6px}.pod .av{width:40px;height:40px}.pod .pn{font-size:12.5px}.pod .step span{font-size:24px}.head{flex-direction:column;gap:12px}.dbody{grid-template-columns:1fr}.chev{display:none}.thumb{width:100%}.info{padding:0 4px 4px}}
 :root{--bgimg:url(bg1.jpg)}
@@ -251,10 +257,13 @@ Loop | - | Harder | 0:09 | s1lent | s1lent | z6hIrivJ2ow | yes | yusttyy 100%
 DINAMIKA | 2 | Hard | 0:06 | bibis | bibis | sl1KzlnIRWA | yes | yusttyy 100%, s1lent 100%, test 50%
 `;
 /* ===== ОЧКИ (одинаково для демон и челлендж листа) =====
- FIRST — очки за 1 место, DROP — во сколько раз меньше каждое следующее место
- (0.8 → 100, 80, 64, 51.2 …), VERIFY_BONUS — множитель для верифера уровня,
+ TOP — сколько мест в каждом листе (места дальше не показываются и очков не дают).
+ FIRST — очки за 1 место, LAST — очки за последнее (TOP-е) место. Всё между ними считается плавно само
+ (при 100 → 12: 100, 86, 74, 63.5, 54.6 … 25.6 на 10 месте … 12 на 15-м).
+ VERIFY_BONUS — множитель для верифера уровня,
  PARTIAL — множитель за рекорд меньше 100% (0.3 → за 50% на топ-1 уровне дают 30 очков; процент не важен, важно что не 100%). */
-const FIRST=100, DROP=0.8, VERIFY_BONUS=1.1, PARTIAL=0.3;
+const TOP=15, FIRST=100, LAST=12, VERIFY_BONUS=1.1, PARTIAL=0.3;
+const DROP=Math.pow(LAST/FIRST,1/(TOP-1));
 const pts=r=>+(FIRST*Math.pow(DROP,r-1)).toFixed(2);
 /* ===== логика ===== */
 const $=s=>document.querySelector(s);
@@ -318,7 +327,7 @@ const parse=t=>t.trim().split("\n").filter(s=>s.trim()&&!s.trim().startsWith("#"
  return {name,id,diff,rarity:(rar||"none").toLowerCase().replace(/[^a-z0-9_-]/g,"")||"none",len:parseLen(time),creator,verifier,yt,verified:!/^(no|n|false|0)$/i.test(ver||""),victors:parseVic(v)};
 });
 function build(){
- const mk=(t,f)=>{let r=0;return parse(t).map((l,k)=>l.verified?({...l,idx:k,rank:++r,pts:f(r)}):({...l,idx:k,rank:0,pts:0}))};
+ const mk=(t,f)=>{let r=0;return parse(t).map(l=>l.verified?({...l,rank:++r,pts:f(r)}):({...l,rank:0,pts:0})).filter(l=>!l.verified||l.rank<=TOP).map((l,k)=>({...l,idx:k}))};
  return {demon:mk(DEMONS,pts),challenge:mk(CHALLENGES,pts)};
 }
 const L=build();
@@ -353,11 +362,13 @@ function render(){
   o.innerHTML=podHtml+tbl;
   return;
  }
- const arr=L[tab].filter(l=>(showUnv||l.verified)&&(!q||[l.name,l.creator,l.verifier,l.id].join(" ").toLowerCase().includes(q)));
+ const real=L[tab].filter(l=>showUnv||l.verified);
+ const arr=q?real.filter(l=>[l.name,l.creator,l.verifier,l.id].join(" ").toLowerCase().includes(q)):real.slice(0,TOP);
  if(!arr.length){o.innerHTML='<div class="empty">Ничего не найдено</div>';return}
+ const free=q?"":Array.from({length:Math.max(0,TOP-arr.length)},(_,j)=>{const n=arr.length+j+1;return `<div class="free"><span class="fn">#${n}</span><div><b>Место свободно</b><span>${showUnv?"Сюда может попасть новый уровень":`Сюда может попасть новый уровень · ${pts(n)} очков`}</span></div></div>`}).join("");
  o.innerHTML=arr.map(l=>`<div class="lvl" data-i="${l.idx}" style="--dc:${dc(l.diff)}"><div class="head">${thumb(l,showUnv?l.idx+1:l.rank)}<div class="info"><h3>${esc(l.name)}<span class="by">by ${nick(l.creator)}</span></h3>${l.diff?`<div class="dfc">${faceImg(l)}<b style="color:${dc(l.diff)}">${esc(l.diff)}</b></div>`:""}
  <div class="meta">Верифер: <b>${nick(l.verifier)}</b> · ID: <b>${l.id}</b>${l.len?` · ⏱ <b>${esc(lenText(l.len))}</b>`:""}</div>
- <div class="tags">${l.verified?`<span class="tag p">${l.pts} очков</span>`:'<span class="tag u">Unverified</span>'}<span class="tag ok">${fullN(l)} прошли</span>${bestP(l)?`<span class="tag u">Прогресс: ${+bestP(l).toFixed(1)}%</span>`:""}</div></div><span class="chev">▾</span></div><div class="det"></div></div>`).join("");
+ <div class="tags">${l.verified?`<span class="tag p">${l.pts} очков</span>`:'<span class="tag u">Unverified</span>'}<span class="tag ok">${fullN(l)} прошли</span>${bestP(l)?`<span class="tag u">Прогресс: ${+bestP(l).toFixed(1)}%</span>`:""}</div></div><span class="chev">▾</span></div><div class="det"></div></div>`).join("")+free;
 }
 const levelDetail=l=>{
  const i=ytId(l.yt), ok=i&&!/^x+$/i.test(i);
